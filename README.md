@@ -56,7 +56,9 @@ UTF8 strings are set off by double quotes: `"this is a string"`. Strings may be 
 Ludus has several different collections with literal representations in the language: tuples, lists, hashmaps, and sets. All collections are immutable, and are compared by value, not reference. All collections in Ludus can hold values of any type, including other collections. When they are indexed, they are zero-indexed.
 
 ##### Tuples
-Tuples are the most basic collection type: they group values together. They are written as elements in parentheses, separated by commas, e.g.: `(1, 2, 3)`, `("abc", :foo, 12.4, nil)`. Tuples may be empty, `()`, and they may also have a single value `(:foo)`. Tuples are immutable in a serious way; they are not persistent (they do not have structural sharing but are re-allocated each time). They have a set length. Tuple literals are also how Ludus represents arguments for function application. They are not iterable.
+Tuples are the most basic collection type: they group values together. They are written as elements in parentheses, separated by commas, e.g.: `(1, 2, 3)`, `("abc", :foo, 12.4, nil)`. Tuples may be empty, `()`, and they may also have a single value `(:foo)`. Tuples are immutable in a serious way; they are not persistent (they do not have structural sharing but are re-allocated each time). They have a static length.
+
+Tuple literals are also how Ludus represents arguments for function application.
 
 ###### Commas
 Trailing commas are allowed in all collection literals.
@@ -124,7 +126,7 @@ Ludus has very small set of operators: assignment (`<-`), splat (`...`), pipelin
 #### Function application
 Ludus has a great many built-in functions (especially since there are no basic operators for things like addition!). Functions can be variadic (take different numbers of arguments, with different behaviours based on those numbers). Functions are written by writing the name of the function as a word with the arguments following in a tuple literal: `foo (bar, baz)`. (Note that the space the function name and arguments tuple is idiomatic, but optional: `foo(bar, baz)` is valid Ludus.) To invoke a function with zero arguments, use the empty tuple: `quux ()`.
 
-An attempt to invoke a function (putting a tuple after an expression) with something that is not a function will raise an error. (Hopefully more helpful than the traditional JavaScript headdesk of `undefined is not a function`.)
+An attempt to invoke a function (putting a tuple after an expression) with something that is not a function will raise an error. (Hopefully more helpful than the traditional JavaScript headdesk of `undefined (read: nil) is not a function`.)
 
 ##### Partial application
 Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder, and all partially applied functions are unary.
@@ -154,7 +156,14 @@ Tuple literals also match against themselves `(1, 2) <- (1, 2)` matches and bind
 
 The empty tuple matches against the empty tuple: `() <- ()`.
 
-There is one exception to the length-match requirement: a tuple pattern may also have a "rest pattern" (or splat), which matches any remaining members in the tuple, e.g.: `(x, y, ...more) <- (1, 2, 3, 4)` binds `x` to `1`, `y` to `2`, and `more` to `(3, 4)`. Meanwhile, `(1, _, ...more) <- (1, 2)` matches, and binds `more` to `()` (the empty tuple).
+###### Unresolved design decision: tuple splats
+**This appears as resolved throuhgout, but it, in fact, not.**
+
+_The original text here:_ There is one exception to the length-match requirement: a tuple pattern may also have a "rest pattern" (or splat), which matches any remaining members in the tuple, e.g.: `(x, y, ...more) <- (1, 2, 3, 4)` binds `x` to `1`, `y` to `2`, and `more` to `(3, 4)`. Meanwhile, `(1, _, ...more) <- (1, 2)` matches, and binds `more` to `()` (the empty tuple).
+
+_Deep thoughts:_ Tuples have to be *fast* (for fast function application and pattern matching), and one way to help make them fast is to ensure that they have lengths that are statically known at compile time. Clojure (as a Lisp) has a deep structural homology between lists and arguments. But Elixir, whose pattern matching I'm cribbing from, does not: functions have their arity in their name, e.g. `add/0`, `add/1` and `add/2` are not different arities of the same function, but different functions.
+
+Ludus should have "variadic" functions, where `add () &=> 0`, `add (1) &=> 1`, and `add (1, 2) &=> 3`. But if tuples must have a statically known length (and function application must use a tuple literal!), then we can compile different arities to different functions under the hood: and that makes things much faster.
 
 ###### Lists
 Lists match identically to tuples, but with square brackets, including splats.
@@ -163,6 +172,8 @@ Lists match identically to tuples, but with square brackets, including splats.
 Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the right bind to words on the left. So: `#{foo} <- #{:foo 42}` matches, and binds `foo` to `42`.Hashmap patterns can also include rest patterns, which will bind any key/value pairs that aren't explicitly invoked on the left hand side: `#{foo, ...rest} <- #{:foo 42, :bar 23, :baz 3.14}` binds `rest` to `#{:bar 23, :baz 3.14}`. Keywords and values on the left hand side match for equality but do not bind names, `#{:bar 23, foo} <- #{:foo 42, :bar 23}` matches and binds `foo` to `42`, and does not bind `bar` to anything. Placeholders may be used as the value in a key/value pair to match any value held at a key (i.e. if they key is defined on the hashmap).
 
 #### Splats
+**See above for a discussion of tuple splats.**
+
 We've already seen the "rest" pattern. A similar technique can be used to insert all values from a collection into another collection. Consider:
 
 ```
@@ -178,11 +189,7 @@ new_users <- #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 ```
 
-Splats work for all Ludus collections. They may be freely interchanged between lists and tuples. 
-
-Hashmap splats may only be used in hashmaps, and may not be used in any other collections. 
-
-Sets may include splats from lists and tuples, but because they are unordered, they may not be splatted into lists or tuples.
+Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples; lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-conversions tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
 
 #### Expressions, blocks, scope, and scripts
 Ludus is, exclusively, an expression-based language: everything returns a value. (Even assignment!; more on this below.) Expressions are separated by newlines or by semicolons.
@@ -257,7 +264,7 @@ if condition
 (Indentations are not significant in Ludus, but are considered good practice for code readability.)
 
 ###### Truthy and falsy
-`if` evaluates `else_expr` if the value of `test_expr` is `nil`, `false`, or `()`. Otherwise, it evaluates `then_expr`. _Unresolved: should `()` really be falsy?_
+`if` evaluates `else_expr` if the value of `test_expr` is `nil` or `false`. Otherwise, it evaluates `then_expr`.
 
 ##### `cond`
 `cond` is a way of testing multiple conditions without nesting `if` expressions. It is the first example of a clause-based expression (`match` and function bodies are also clause-based.) Consider the example:
@@ -402,6 +409,7 @@ fn add {
   () -> 0
   (x) -> x
   (x, y) -> {...native code...}
+  & NB: this example may be obsolete (see note on tuple splats)
   (x, y, ...more) -> {
     sum <- add (x, y)
     add (sum, ...more)
@@ -468,7 +476,9 @@ fn map {
 This is tail recursive, and thus can be optimized by Ludus to run quickly. Note that getting something into tail-recursive form often involves introducing a "helper" argument.
 
 ###### Unresolved design decisions
-* _Looping forms._ Is it worth building in looping forms, e.g. Clojure's `loop`/`recur`? Or Logo's `repeat`? Part of this is a pedagogical decision about managing early turtle graphics, e.g. `repeat 4 { forward (50); right (90) }` vs `repeat (4, fn () -> { forward (50); right (90) })`. I think my preference is for the functional version, but I can see an argument for special syntax here. One nice thing about a `loop`/`recur` construct may be that it can enforce tail recursion (which we should not do for functions). That said, we can introduce `recur` as a reserved word which will raise an error if it is not in tail position in a function expression. Nevertheless, consider the following:
+* _Looping forms._ Is it worth building in looping forms, e.g. Clojure's `loop`/`recur`? Or Logo's `repeat`? Part of this is a pedagogical decision about managing early turtle graphics, e.g. `repeat 4 { forward (50); right (90) }` vs `repeat (4, fn () -> { forward (50); right (90) })`. I think my preference is for the functional version of `repeat`, but I can see an argument for special syntax here. 
+
+As for direct looping, one nice thing about a `loop`/`recur` construct may be that it can enforce tail recursion (which we should not do for functions). That said, we can introduce `recur` as a reserved word which will raise an error if it is not in tail position in a function expression. Nevertheless, consider the following:
 ```
 fn map {
   (f, source) -> loop (source, []) with {
@@ -477,15 +487,17 @@ fn map {
   }
 }
 ```
-It has a lovely 1-to-1 correspondence with `match`, and need not use a tuple. Also, it avoids both creating a fucntion (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Temporary decision: yes, `recur` as reserved word in functions; yes, `loop`; no, `repeat`._
+It has a lovely 1-to-1 correspondence with `match`, and need not use a tuple (is that right?--we want this to be homologous to function application). Also, it avoids both creating a fucntion (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Temporary decision: yes, `recur` as reserved word in functions; yes, `loop`; no, `repeat`._
+
+Consider also a simplified syntax, on the model of an anonymous function: `loop (<args>) -> <expr>`.
 
 * _Early return._ Do we want a `return` reserved word that will allow for early returns from functions? I believe the `cond` and `match` forms, along with multiple function clauses, actually gets you whatever behaviour you want. But Rust has a `return`, and that may well be helpful for some imperative code. _Temporary decision: for now, no early return._
 
-#### References and mutations
-So far, everything described here is completely stateless: all literals are immutable, and names cannot even be re-bound. Eventually, something has to change its state. Enter references and mutations. A reference is name that is bound to something mutable, using the `ref` reserved word. Mutations allow that name to have its value changed, using the `mut` reserved word.
+#### Variables and mutations
+So far, everything described here is completely stateless: all literals are immutable, and names cannot even be re-bound. Eventually, something has to change its state. Enter variables and mutations. A variable is name that is bound to something mutable, using the `var` reserved word. Mutations allow that name to have its value changed, using the `mut` reserved word.
 
 ```
-ref a_number <- 12
+var a_number <- 12
 & a_number is 12
 
 mut a_number <- inc (a_number)
@@ -496,7 +508,7 @@ References can only be re-bound after the `mut` reserved word. Also, once a refe
 
 ```
 count_up <- {
-  ref a_counter <- 0
+  var a_counter <- 0
   fn increment_counter () -> mut a_counter <- inc (a_counter)
 }
 
@@ -506,7 +518,7 @@ count_up () &=> 3
 
 & but nota bene
 cant_count <- {
-  ref another_counter <- 0
+  var another_counter <- 0
 }
 
 cant_count &=> 0
@@ -545,7 +557,7 @@ ns Foo {
 ```
 
 #### Types and patterns
-**NB: This section is very tenative.**
+**This section is very tenative.**
 
 Ludus has a strictly limited number of types, which correspond to the literal values and collections:
 * `nil`
@@ -574,7 +586,7 @@ inc ("foo") &=> error!
 
 fn add_strings_or_numbers {
   (x as :number, y as :number) -> add (x, y)
-  (x as :string, y as :string) -> string (x, y)
+  (x as :string, y as :string) -> concat (x, y)
 }
 add_strings_or_numbers (4, 5) &=> 9
 add_strings_or_numbers ("foo", "bar") &=> "foobar"
@@ -584,7 +596,7 @@ add_strings_or_numbers ("foo", 4) &=> error!
 This is a simple but quite robust form of type-checking that allows for polymorphic behaviours. It is somewhat verbose, but that discourages overly-ambitious typechecking. The prelude/standard library will be typechecked in this way.
 
 ##### Unresolved design decision: named patterns
-This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._
+This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._ In particular, this will 
 
 One possible restriction to avoid deeply-nested patterns is to avoid named patterns at all! No named patterns in the definition of named patterns.
 
@@ -615,3 +627,15 @@ In addition, it's worth holding onto a basic distinction between errors in busin
 Pattern matching will driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
 
 The thought for now: there should be no user-facing error system other than returning error tuples, and maybe `panic!`. Let's see how far we can get before we need to `raise` anything (although obviously that will be a reserved word).
+
+#### Reserved words
+In this document so far, here is the complete list of Ludus reserved words.
+
+Here are the reserved words that will definitely be in the language:
+`as`, `cond`, `else`, `false`, `fn`, `if`, `match`, `mut`, `nil`, `panic!` or (`panic`), `then`, `true`, `var`, `with`.
+
+Here are those that are tentative or possibly proposed in this document:
+`defer`, `loop`, `ns`, `pattern`, `raise`, `recur`, `repeat`, `return`, `when`.
+
+Others that are possible are:
+`assert`, `async`, `await`, `catch`, `enum`, `finally`, `mod`, `module`, `try`, `type`, `wait`.
