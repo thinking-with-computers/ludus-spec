@@ -5,6 +5,8 @@
 
 & Another small revision: `ns`es are explicitly hashes.
 
+& This gets only code blocks written with unadorned curly braces.
+
 & turtle graphics
 
 & * draw a square

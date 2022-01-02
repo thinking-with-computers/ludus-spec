@@ -2,9 +2,9 @@
 ## A draft specification for the Ludus language
 
 ### Overview
-Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
+Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. As well as Elixir (which itself draws from Clojure). It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
 * It is expression-based.
-* It is immutable by default, including persistent data structures.
+* It is immutable by default, including only persistent data structures.
 * It uses pattern-matching extensively.
 
 ### Syntax & language base
@@ -248,7 +248,7 @@ Ludus is, at its heart, a scripting language. Each file, called a script, is its
 Ludus has three main control flow constructs, called "conditional forms": `if`, `cond`, and `match`. All three are expressions, not statements.
 
 ##### `if`
-`if` is fairly unique in Ludus, in that it comes with two additional reserved words, `then` and `else`. Also, note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
+`if` is fairly unusual in Ludus, in that it comes with two additional reserved words, `then` and `else`. Also, note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
 
 Newlines may come after the various expressions, e.g.:
 
@@ -256,8 +256,8 @@ Newlines may come after the various expressions, e.g.:
 if condition
   then do_a_thing ()
   else {
-    add (1 2)
-    frobulate (foo bar)
+    add (1, 2)
+    frobulate (foo, bar)
   }
 ```
 
@@ -288,7 +288,7 @@ As with all expressions, you may use a block in either side of a clause (althoug
 `cond` is useful when the conditions involve multiple values, or testing across various domains. But it is rather less useful than `match`, which is the real conditional workhorse of Ludus.
 
 ##### `match`
-`match` is much the same as `cond`, but uses pattern matching (as assignment, above) to determine which clause to evalute. Consider the example:
+`match` is much the same as `cond`, but uses pattern matching (as assignment, above) to determine which clause to evalute. This collection of pattern matching clauses is called a "`with` block," which comes after `match` and other constructs with identical semantics: `loop`, named functions, etc. Consider the example:
 
 ```
 match do_something () with {
@@ -323,7 +323,7 @@ The formal description here is fairly straightforward: `match <value_expr> with 
 As with `cond`, if no clause matches, an error is raised. Also, as with `cond`, there are multiple ways of writing the default case, to wit: idiomatically, the placeholder (`_`) will match and not bind a name. You may also use the reserved word `else`.
 
 ###### Use `else` and `_`
-Best practice is to use `else` or `_` for default cases in both `cond` and `match`, since they behave similarly. If you use a literal truthy value to form your default clause in `cond`, that is substantially different behaviour than using a literal value in `match` (which will only match on equality).
+Best practice is to use `else` or `_` for default cases in both `cond` and `match`, since they behave similarly in all conditional forms. If you use a literal truthy value to form your default clause in `cond`, that is substantially different behaviour than using a literal value in `match` (which will only match on equality).
 
 ###### Unresolved design decisions
 * _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: errors on unused bound names._
@@ -346,7 +346,7 @@ fn (x, y, z) -> {
 }
 ```
 
-Anonymous functions can be bound to names using a normal assignment operator: `inc <- fn (x) -> add (x, 1)`. That said, in this example, `inc` is still an anonymous function: it has no name.
+Anonymous functions can be bound to names using a normal assignment operator: `inc <- fn (x) -> add (x, 1)`. That said, in this example, `inc` is still an anonymous function: it has no name. (For example, simply being rendered at the REPL as: `fn<anon.>`.)
 
 ##### Named functions
 You can create a named function by putting its name as a word after `fn` and before the clause:
@@ -361,10 +361,12 @@ Named functions bind the name to the function, and also attach that name as meta
 Named functions also bind their name inside the body of the function clause, so they can be called recursively. (More on recursion below.)
 
 ##### Variadic and documented functions
-Functions can contain multiple clauses between braces, like a `match` expression. At the top of the clause block, you may also include docstring comments, which will be used in generated documentation.
+Functions can also contain multiple clauses, using a `with` block (containing one or more clauses), identically to a `match` expression. At the top of the clause block, you may also include docstring comments, which will be used in generated documentation.
+
+Also, in the `with` block following a named function, patterns must have a left-hand side that is a tuple pattern. Anything else will raise a syntax error.
 
 ```
-fn foo {
+fn foo with {
   &&& A docstring (with _markdown_!).
   &&& Docstrings are optional.
   & a normal comment
@@ -487,9 +489,9 @@ fn map {
   }
 }
 ```
-It has a lovely 1-to-1 correspondence with `match`, and need not use a tuple (is that right?--we want this to be homologous to function application). Also, it avoids both creating a fucntion (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Temporary decision: yes, `recur` as reserved word in functions; yes, `loop`; no, `repeat`._
+It has a lovely 1-to-1 correspondence with `match`, and also closely resembles functions. Also, it avoids both creating a function (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Temporary decision: yes `loop` and `repeat`. Maybe `recur` as a reserved word in functions, but for now `recur` can only belong in a `loop`._
 
-Consider also a simplified syntax, on the model of an anonymous function: `loop (<args>) -> <expr>`.
+Consider also a simplified syntax, on the model of an anonymous function: `loop (<args>) (<params>) -> <expr>`. This involves awkward back-to-back tuples; maybe not.
 
 * _Early return._ Do we want a `return` reserved word that will allow for early returns from functions? I believe the `cond` and `match` forms, along with multiple function clauses, actually gets you whatever behaviour you want. But Rust has a `return`, and that may well be helpful for some imperative code. _Temporary decision: for now, no early return._
 
@@ -519,6 +521,7 @@ count_up () &=> 3
 & but nota bene
 cant_count <- {
   var another_counter <- 0
+  another_counter
 }
 
 cant_count &=> 0
@@ -570,6 +573,8 @@ Ludus has a strictly limited number of types, which correspond to the literal va
 * Hashmap
 * Set
 * Function
+* Namespace?
+* Generator/iterator/sequence?
 
 There are no user-defined types. (Really?) None of these types are parametric. So a list is a list is a list.
 
@@ -596,7 +601,7 @@ add_strings_or_numbers ("foo", 4) &=> error!
 This is a simple but quite robust form of type-checking that allows for polymorphic behaviours. It is somewhat verbose, but that discourages overly-ambitious typechecking. The prelude/standard library will be typechecked in this way.
 
 ##### Unresolved design decision: named patterns
-This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._ In particular, this will 
+This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._
 
 One possible restriction to avoid deeply-nested patterns is to avoid named patterns at all! No named patterns in the definition of named patterns.
 
@@ -604,10 +609,10 @@ One possible restriction to avoid deeply-nested patterns is to avoid named patte
 Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Temporary decision: wait and see; don't add this yet._
 
 ###### Thought: finer-grained "types"
-Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions._ But also: see the next unresolved design decision: guards and named patterns are a robust predicate DSL, where you can tell if a value conforms to a shape that you've named. But it's not a type, in the sense that you can't climb back up from the value to some more general category.
+Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions._ But also: see the next unresolved design decision: guards and named patterns are a robust _predicate_ DSL, where you can tell if a value conforms to a shape that you've named. But it's _not_ a type system, in the sense that you can't climb back up from the value to some more general category.
 
 #### Unresolved design decision: polymorphism
-I don't believe this is deeply urgent, since if we get some well-designed abstractions (which I think these are!; I am standing on the shoulders of Rich Hickey), polymorphism isn't actually much of a problem. There aren't user-defined types, so there is no need to require user-facing extensions. But we can use the same basic foundation for polymorphism I used in the original JavaScript-hosted Ludus, which allows for user-defined types that can be associated with namespaces to produce module. Again, I want to see how far we can get without module-based (or other) polymorphism. Convention (result tuples) over polymorphism, to abuse the Rails mantra.
+I don't believe this is deeply urgent, since if we get some well-designed abstractions (which I think these are!; I am standing on the shoulders of Rich Hickey), polymorphism isn't actually much of a problem. There aren't user-defined types, so there is no need to require user-facing extensions. But we can use the same basic foundation for polymorphism I used in the original JavaScript-hosted Ludus, which allows for user-defined types that can be associated with namespaces to produce module. Again, I want to see how far we can get without module-based (or other) polymorphism. Convention (e.g., result tuples) over polymorphism, to abuse the Rails mantra.
  
 #### Equality
 All equality in Ludus is value-equality--with one exception. Functions are reference-equal (testing for function equality is probably... not a thing you should be doing very often). All atomic and collection values are compared based on value using the `eq` function. So, e.g., `eq (${1, 2, 3}, ${3, 2, 1}, ${2, 3, 1}) &=> true`
@@ -639,3 +644,84 @@ Here are those that are tentative or possibly proposed in this document:
 
 Others that are possible are:
 `assert`, `async`, `await`, `catch`, `enum`, `finally`, `mod`, `module`, `try`, `type`, `wait`.
+
+#### Some nice-to-haves
+* Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions), or, approaching it from a different perspective, a `try`/`catch`-like construct, where match errors are swallowed. (But we want to avoid exceptions!).
+* Generators & iterators (this could be syntactic sugar!, but will likely be optimized away), e.g.:
+```
+counter_to_3 <- {
+  var current <- 0
+
+  fn next () -> {
+    out <- current
+    mut current <- inc (current)
+    if gt (current, 3)
+      then (:done, nil)
+      else (:value, out)
+  }
+
+  #{next}
+} &=> #{:next fn<next>}
+
+counter_to_3:next () &=> (:value, 0)
+counter_to_3:next () &=> (:value, 1)
+counter_to_3:next () &=> (:value, 2)
+counter_to_3:next () &=> (:value, 3)
+counter_to_3:next () &=> (:done, nil)
+counter_to_3:next () &=> (:done, nil)
+
+```
+
+This could be rewritten as:
+
+```
+conter_to_3 <- gen (0) with { 
+  (current) -> {
+    yield current
+    if gt (current, 3)
+      then :ok
+      else recur (inc (current))
+  }
+}
+```
+
+This introduces the `yield` reserved word, to be used in a `gen` expression that evaluates to a generator (or iterator, or sequence). So you could get fairly concise/elegant versions of some other things:
+
+```
+fn seq with
+  (h as :hashmap) -> seq (list (h))
+  (s as :set) -> seq (list (s))
+  (s as :string) -> seq (list (s))
+  (l as :list) -> gen (l) with
+    ([]) -> :ok
+    ([first, ...rest]) -> {
+      yield first
+      recur (rest)
+    }
+  end
+end
+
+fn range with {
+  (end as :number) -> range (0, end)
+  (start as :number, end as :number) -> range (start, end, 1) 
+  (start as :number, 
+    end as :number, 
+    step as :number) -> gen (start) with {
+      (current) -> {
+        yield current
+        if gte (current, end)
+          then :ok
+          else recur (add (current, step))
+      }
+    }
+}
+```
+
+Generators may well be a later nice-to-have, but I suspect the protocol (dead simple, cribbed largely from JS) will be pretty core, and need to be established pretty early.
+
+##### Protocols in the language
+Following on the convention here of `(:value, x)/(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
+
+* Iterator/generator tuples: `(:value, value)` and `(:done, value)`
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` operator, which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics. (But this could also just be a function.)
+* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for.
