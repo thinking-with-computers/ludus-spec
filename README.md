@@ -189,7 +189,7 @@ new_users <- #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 ```
 
-Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples; lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-conversions tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
+Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples (eds: _probably not!_); lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-conversions tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
 
 #### Expressions, blocks, scope, and scripts
 Ludus is, exclusively, an expression-based language: everything returns a value. (Even assignment!; more on this below.) Expressions are separated by newlines or by semicolons.
@@ -281,7 +281,7 @@ cond {
 }
 ```
 
-`cond` is followed by curly braces, but instead of a block of expressions, it is a block of one or more _clauses_. For `cond`, the clause is written `<test_expr> -> <result_expr>`. If `test_expr` evaluates to truthy, `result_expr` is evaluated, and its value returned. No other clauses are evaluated (there is no fallthrough). If no clause's `test_expr` evaluates to truthy, no code is evaluated--and an error is raised. To write a default case, you have a few options. Any literal truthy value will do the trick. Best practice here would be to use either `true` or a descriptive keyword, like `:else` or `:default`. You may also use the reserved word `else`, or the placeholder (`_`, as above).
+`cond` is followed by curly braces, but instead of a block of expressions, it is a block of one or more _clauses_. For `cond`, the clause is written `<test_expr> -> <result_expr>`. If `test_expr` evaluates to truthy, `result_expr` is evaluated, and its value returned. No other clauses are evaluated (there is no fallthrough). If no clause's `test_expr` evaluates to truthy, no code is evaluated--and an error is raised. To write a default case, you have a few options. Any literal truthy value will do the trick. Best practice here would be the reserved word `else`, or the placeholder (`_`, as above).
 
 As with all expressions, you may use a block in either side of a clause (although it's ugly and not recommended to use one on the left-hand side).
 
@@ -329,6 +329,7 @@ Best practice is to use `else` or `_` for default cases in both `cond` and `matc
 * _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: errors on unused bound names._
     - _Descriptive placeholders?_ You can use a placeholder in multiple places in a pattern, but they all look equivalent. Do we want to allow `_foo` names, which aren't bound but _do_ offer the possibility of a descriptive name. _Temporary answer: yes descriptive placeholders._
 * _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Temporary answer: errors on definitely unreachable clauses._ That said, this is the stupid version of this: we don't do exhaustiveness checking, so you'll only get an error after a clause that always matches.
+* _`with`?_ The `with` here is actually not necessary. It gives the syntax some breathing room. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Temporary answer: none; keep working on our intuitions._ One possible solution that runs the consistency the other way: use `do` for expression blocks. But that's gonna feel cluttered... 
 
 #### Functions
 Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntaxes. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
@@ -361,12 +362,12 @@ Named functions bind the name to the function, and also attach that name as meta
 Named functions also bind their name inside the body of the function clause, so they can be called recursively. (More on recursion below.)
 
 ##### Variadic and documented functions
-Functions can also contain multiple clauses, using a `with` block (containing one or more clauses), identically to a `match` expression. At the top of the clause block, you may also include docstring comments, which will be used in generated documentation.
+Functions can also contain multiple clauses, identically to a `match` expression. At the top of the clause block, you may also include docstring comments, which will be used in generated documentation.
 
-Also, in the `with` block following a named function, patterns must have a left-hand side that is a tuple pattern. Anything else will raise a syntax error.
+Also, in all function clauses, patterns must have a left-hand side that is a tuple pattern. Anything else will raise a syntax error.
 
 ```
-fn foo with {
+fn foo {
   &&& A docstring (with _markdown_!).
   &&& Docstrings are optional.
   & a normal comment
@@ -679,7 +680,7 @@ conter_to_3 <- gen (0) with {
   (current) -> {
     yield current
     if gt (current, 3)
-      then :ok
+      then nil
       else recur (inc (current))
   }
 }
@@ -688,18 +689,18 @@ conter_to_3 <- gen (0) with {
 This introduces the `yield` reserved word, to be used in a `gen` expression that evaluates to a generator (or iterator, or sequence). So you could get fairly concise/elegant versions of some other things:
 
 ```
-fn seq with
+fn seq with {
   (h as :hashmap) -> seq (list (h))
   (s as :set) -> seq (list (s))
   (s as :string) -> seq (list (s))
-  (l as :list) -> gen (l) with
-    ([]) -> :ok
+  (l as :list) -> gen (l) with {
+    ([]) -> nil
     ([first, ...rest]) -> {
       yield first
       recur (rest)
     }
-  end
-end
+  }
+}
 
 fn range with {
   (end as :number) -> range (0, end)
@@ -710,7 +711,7 @@ fn range with {
       (current) -> {
         yield current
         if gte (current, end)
-          then :ok
+          then nil
           else recur (add (current, step))
       }
     }
@@ -723,5 +724,28 @@ Generators may well be a later nice-to-have, but I suspect the protocol (dead si
 Following on the convention here of `(:value, x)/(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` operator, which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics. (But this could also just be a function.)
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` operator, which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function.)
 * Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for.
+
+#### Special forms
+There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
+* Core conditional functions: `eq`, `and`, `or`. These are important because we want these both to be infinitely-variadic as well as short-circuit on the first relevant argument. This means their execution model is fundamentally different.
+* Some mathematical functions, e.g. `add`, `mult`, etc., which are usefully truly variadic.
+* _To be continued..._
+
+#### Errors and error handling
+Error handling is so, so very important to Ludus. I'm mostly cribbing from other sources here (see especially https://github.com/apple/swift/blob/swift-5.5-RELEASE/docs/ErrorHandlingRationale.rst). But there are a few types of errors, and it's worth being cognizent of them:
+* Lexical & syntax errors: when a programmer types something that's nonsense. These can be detected statically and should be raised during the scanning phase. Exection doesn't even start and should be reported.
+  * Lexical & syntax errors include everything that can be deduced statically: nonsense input of all kinds, function invocations with incorrect arity, unbound name access, `recur` outside of `loop` or `gen` or not in tail position, attempts to access undefined members of namespaces.
+  * This set should be gradually increased to cover as much as possible. For example, incorrect namespace access can be detected statically at compile-time, but will require some fancy-footing to do so. That fancy-footing is a high-priority usability goal.
+* Logic errors: when a programmer types syntactically correct nonsense, for example invoking a function with incorrect arity or incorrect types. Some of these can be statically checked (function arity), some of them not (argument types). Also, every fallthrough error--`cond` and `match` and so on--is also a logic error. As is an assignment that does not match. If these can be detected statically, don't start and report. If they can't (e.g. argument types) then the program crashes.
+  * Logic errors include: match failures, attempts to invoke things that aren't functions as functions.
+* Domain errors: when the program does something that may fail, but should not crash the program, e.g. reading from a file that isn't there. These should be modeled using a result type, e.g. either `(:ok, value)` or `(:error, message)`. Pattern matching makes these easy to work with `match may_fail () with ...`. But sometimes you want error propagation. The question, from a design perspective, is how to handle that.
+* With result tuples and unrecoverable crashes, we're close to Rust's error model. Rust bakes the result model into the language, and offers two useful models for constructs that are worth considering for Ludus:
+  * `try <expr>`, or error propagation: The expression after `try` must return an error tuple (if not, panic!). If it gets an `:ok`, it unwraps that value and returns it. If it gets an `:error`, it immediately returns that error tuple, short-circuiting evaluation of the rest of the block. This allows for propagation, but it would be the only early return/control flow magic in the entirety of Ludus, and for that reason, I don't love it. (And yet, it may well prove very, very useful.)
+  * `expect <expr>`, or crash-on-error: The expression after `expect` must return an error tuple. If it gets an `:ok`, it unwraps the value and returns it. If it gets an `:error`, it panics with the second member of the tuple. This promotes a result tuple into a runtime error.
+  * Consider also a convention, which is that functions come in two versions, safe and dangerous: `read_file` and `read_file!`. The former returns a result tuple; the latter returns a bare value and panics on failure. (And is written `fn read_file! (path) -> expect read_file (path)`.)
+    * This convetion should be imposed by static analysis with a linter, but with a dynamic language, might not want to be a syntax error.
+* Should it be possible to "demote" a lexical, syntax, or logic error to something like a result? In practice, this may be useful (if only very rarely used). Consider:
+  * `handle <expr>`: The expression after `handle` may panic. If it doesn't, just return the value of the expression, `value`, in a result tuple: `(:ok, value)`. If it does, return `(:error, message)` (with `nil` as the message for a bare panic).
+  * I suspect that `handle`ing panics will mostly be useful for things like writing a REPL, but should be avoided if not omitted from the language.
