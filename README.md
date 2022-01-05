@@ -648,6 +648,7 @@ Others that are possible are:
 
 #### Some nice-to-haves
 * Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions), or, approaching it from a different perspective, a `try`/`catch`-like construct, where match errors are swallowed. (But we want to avoid exceptions!).
+* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `myfn <- f | g | h` or `myfn <- h . g . f`.
 * Generators & iterators (this could be syntactic sugar!, but will likely be optimized away), e.g.:
 ```
 counter_to_3 <- {
@@ -725,7 +726,7 @@ Following on the convention here of `(:value, x)/(:done, y)`, I am thinking abou
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
 * Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` operator, which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function.)
-* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for.
+* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the `=>` operator should short-circuit on `nil`?
 
 #### Special forms
 There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
