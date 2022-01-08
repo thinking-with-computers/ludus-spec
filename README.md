@@ -92,7 +92,7 @@ Lists are ordered, indexed, variable-length, persistent collections. They are wr
 ##### Hashmaps
 Hashmaps are unordered key-value pairs: they store values associated with particular keys. Keys must be Ludus keywords; values can be any type. They are written between curly braces, introduced by a hash: `#{:foo 23, :bar 23}`. They have substantially similar semantics to Clojure's persistent maps.
 
-Newlines separate tiems, as with other collections, but both the keyword and the value must appear on the same line (or else you will get an error):
+Newlines separate items, as with other collections, but both the keyword and the value must appear on the same line (or else you will get an error):
 
 ```
 #{
