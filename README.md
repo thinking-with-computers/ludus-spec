@@ -7,6 +7,9 @@ Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps:
 * It is immutable by default, including only persistent data structures.
 * It uses pattern-matching extensively.
 
+#### The spirit of Ludus
+"Ludus" is Roger Caillois's name for rule-bound play. To Logo, Ludus adds an emphasis on strictness. This is because the stricter the language, the better the errors you can generate. And better errors mean better learning. Also, because Ludus is meant for learners, a complex type system is unnecessary overhead. So, Ludus is meant to be as strict as you can plausibly be in a dynamic language.
+
 ### Syntax & language base
 
 #### Whitespace
@@ -155,7 +158,7 @@ An attempt to invoke a function (putting a tuple after an expression) with somet
 Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder in a tuple applied to a function. As a consequence, all partially applied functions are unary.
 
 ##### Pipeline application
-Ludus also allows for function pipelines. The last example above could be written `2 |> add (1, _) &=> 3`. Pipelines may be chained: `2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36`. The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions.
+Ludus also allows for function pipelines. The last example above could be written `2 |> add (1, _) &=> 3`. Pipelines may be chained: `2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36`. The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions. (See below, re: a bind operator.)
 
 #### Patterns and assignment
 Ludus uses pattern matching from the ground up: all assignments are actually patterns. Patterns, generally, do two things: they match (against a value), and they bind names (in a scope).
@@ -210,6 +213,12 @@ users <- #{
 }
 new_users <- #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
+
+& however, this creates a new hashmap, more idiomatic (and faster) would be:
+new_users_update <- update (users, :Ashley, "ashley@outlook.com")
+
+& either way, `users` is untouched
+users &=> #{:Pat "pat@gmail.com", :Chris "chris@yahoo.com"}
 ```
 
 Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples (eds: _probably not!_); lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-type-casts tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
@@ -222,7 +231,7 @@ Ludus is, exclusively, an expression-based language: everything returns a value.
 "foo"
 :bar
 false; true & there are two expressions on this line
-add (1, 2, 3)
+add (2, 4)
 ```
 
 Each line is evaluated on its own, and returns the value to which it evaluates. Literals (naturally) evaluate to themselves. Function calls are invoked and return their return value. Bound names return the value that is bound to them. Unbound names raise errors (they cannot be evaluated).
@@ -738,17 +747,15 @@ fn seq with {
 }
 
 fn range with {
-  (end as :number) -> range (0, end)
+  (end as :number) -> range (0, end, 1)
   (start as :number, end as :number) -> range (start, end, 1) 
-  (start as :number, 
-    end as :number, 
-    step as :number) -> gen (start) with {
-      (current) -> {
-        yield current
-        if gte (current, end)
-          then nil
-          else recur (add (current, step))
-      }
+  (start as :number 
+    end as :number 
+    step as :number) -> gen (start) (current) -> {
+      yield current
+      if gte (current, end)
+        then nil
+        else recur (add (current, step))
     }
 }
 ```
@@ -759,12 +766,12 @@ Generators may well be a later nice-to-have, but I suspect the protocol (dead si
 Following on the convention here of `(:value, x)/(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function.)
-* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil`?
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`)
+* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil` as well as an error result?
 
 #### Special forms
 There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
-* Core conditional functions: `eq`, `and`, `or`. These are important because we want these both to be infinitely-variadic as well as short-circuit on the first relevant argument. This means their execution model is fundamentally different.
+* Core conditional functions: `eq`, `and`, `or`. These are important because we want these both to be indefinitely-variadic as well as short-circuit on the first relevant argument. This means their execution model is fundamentally different.
 * Some mathematical functions, e.g. `add`, `mult`, etc., which are usefully truly variadic.
 * _To be continued..._
 
@@ -777,8 +784,8 @@ Error handling is so, so very important to Ludus. I'm mostly cribbing from other
   * Logic errors include: match failures, attempts to invoke things that aren't functions as functions.
 * Domain errors: when the program does something that may fail, but should not crash the program, e.g. reading from a file that isn't there. These should be modeled using a result type, e.g. either `(:ok, value)` or `(:error, message)`. Pattern matching makes these easy to work with `match may_fail () with ...`. But sometimes you want error propagation. The question, from a design perspective, is how to handle that.
 * With result tuples and unrecoverable crashes, we're close to Rust's error model. Rust bakes the result model into the language, and offers two useful models for constructs that are worth considering for Ludus:
-  * `try <expr>`, or error propagation: The expression after `try` must return an error tuple (if not, panic!). If it gets an `:ok`, it unwraps that value and returns it. If it gets an `:error`, it immediately returns that error tuple, short-circuiting evaluation of the rest of the block. This allows for propagation, but it would be the only early return/control flow magic in the entirety of Ludus, and for that reason, I don't love it. (And yet, it may well prove very, very useful.)
-  * `expect <expr>`, or crash-on-error: The expression after `expect` must return an error tuple. If it gets an `:ok`, it unwraps the value and returns it. If it gets an `:error`, it panics with the second member of the tuple. This promotes a result tuple into a runtime error.
+  * `try <expr>`, or error propagation: The expression after `try` must return an error tuple (if not, panic!). If it gets an `:ok`, it unwraps that value and returns it. If it gets an `:error`, it immediately returns that error tuple, short-circuiting evaluation of the rest of the block. This allows for propagation, but it would be the only early return/control flow magic in the entirety of Ludus (except `yield`?--but that is a different matter, since it's sugar). For that reason, I don't love it. (And yet, it may well prove very, very useful.)
+  * `expect <expr>`, or crash-on-error: The expression after `expect` must return an error tuple. If it gets an `:ok`, it unwraps the value and returns it. If it gets an `:error`, it panics with the second member of the tuple. This promotes a result tuple into a runtime error. (But this could be a function!)
   * Consider also a convention, which is that functions come in two versions, safe and dangerous: `read_file` and `read_file!`. The former returns a result tuple; the latter returns a bare value and panics on failure. (And is written `fn read_file! (path) -> expect read_file (path)`.)
     * This convetion should be imposed by static analysis with a linter, but with a dynamic language, might not want to be a syntax error.
 * Should it be possible to "demote" a lexical, syntax, or logic error to something like a result? In practice, this may be useful (if only very rarely used). Consider:
