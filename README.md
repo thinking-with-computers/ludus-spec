@@ -2,7 +2,7 @@
 ## A draft specification for the Ludus language
 
 ### Overview
-Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. As well as Elixir (which itself draws from Clojure). It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
+Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. As well as Elixir (which itself draws from Clojure, but has a more "modern" syntax). It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
 * It is expression-based.
 * It is immutable by default, including only persistent data structures.
 * It uses pattern-matching extensively.
@@ -38,19 +38,22 @@ Ludus has several builtin literal types: `nil`, Booleans, numbers, keywords, and
 ##### Numbers
 Ludus has one number type, 64-bit floating point numbers. You may write numbers either as integers, `7`, `-12`, `4_000_000`; or as decimals, `3.14`, `-12.345`, `0.224`. Underscore separators are optional and ignored, but may not appear at the beginning or end of the number. Integers may not begin with leading `0`s. The negative sign, `-` at the beginning of a number, is part of the number and may not be separated by a space.
 
-This has the upside of not bothering new users with multiple number types (as with everything in computers, numbers are shockingly complicated). It has the downside of all of the IEEE floating-point math hell, which learners won't touch right away but will cause pain down the line.
+This has the upside of not bothering new users with multiple number types (as with everything in computers, numbers are shockingly complicated). It has the downside of all of the IEEE floating-point math hell, which learners won't touch right away but will cause pain down the line (floats come for us all).
 
 ###### Constants
-Ludus defines some (which?) constants, with specific names. `Infinity`, `Pi`, and so on. Note that these are capitalized (are they?--traditionally, they would be ALL_CAPS, which, ::sad face emoji::).
+Ludus defines some (which?) constants, with specific names. `Infinity`, `Pi`, and so on. Note that these are capitalized (are they?--traditionally, they would be ALL_CAPS, which, ::sad face emoji::). These aren't defined at the language level, they're just named values in the prelude.
 
 ##### Keywords
 Keywords evaluate to themselves and only to themselves. They are written as a word preceded by a colon: `:keyword`, `:foo`, `:n00b`. They have the same naming rules as words. They must begin with a colon, and then a letter, and then any character that is not a word-terminator (e.g. whitespace). `:n00b` will be the same value no matter where it's written (and different from every other keyword).
+
+###### Terminators
+Characters that terminate words: here's the set of terminator characters (as Clojure characters): `\: \; \newline \space \tab \{ \( \[ \$ \# \- \< \& \,`.
 
 ##### Strings
 UTF8 strings are set off by double quotes: `"this is a string"`. Strings may be split across lines with a `\` before the newline. (Strings are also complicated!)
 
 ###### Unresolved design decision: string inerpolation
-* Do we want string interpolation? It's useful in string literals: `"string string {interpolation} string string"`. _Temporary decision: yes, interpolation, but deferred until later._
+* Do we want string interpolation? It's useful in string literals: `"string string {interpolation} string string"`. _Temporary decision: yes, interpolation, but deferred until later._ NB: Rust has recently added support for a light duty (safer) version of this, where what's interpolated isn't any arbitrary expression but only bound names. I think this may be a way to go.
 
 #### Literal collections
 Ludus has several different collections with literal representations in the language: tuples, lists, hashmaps, and sets. All collections are immutable, and are compared by value, not reference. All collections in Ludus can hold values of any type, including other collections. When they are indexed, they are zero-indexed.
@@ -60,7 +63,22 @@ Tuples are the most basic collection type: they group values together. They are 
 
 Tuple literals are also how Ludus represents arguments for function application.
 
+###### Mostly-resolved design decision: Tuples, splats, variadic functions, and the stack
+This is a major design decision, and one I think has some important consequences for Ludus. Tuples cannot be splatted into. This means that every tuple has a statically known length at compile time. And that also means that every function call has an explicit arity at compile time. Moreoever, while there is an (easy, often-used) way to write variadic functions, every function has a collection of explicit, statically-known arities at compile time. This means we can catch "wrong number of arguments" errors at compile time. It means we can optimize pattern matching. And it also means that tuples, when we get to a VM, can be stored on the stack rather than on the heap (making them fast!).
+
+It's worth tracing the design space here, because the three langauges that are sources of inspiration here do things differently:
+
+Logo is the weirdest among these. Logo has no variadic functions; every function has a known arity. In addition, because Logo was set on getting rid of Lisp's parentheses for kids, function calls don't have parentheses: they're just lists of arguments separated by spaces after a function, e.g. `FLOWER 100 50`. But that means the _parser_ has to know the arities of functions to decide what arguments belong to which function call. Among other decisions, this is one that makes Logo extremely weird compared to modern languages. Since the target audience of Ludus isn't young kids, and because there's a widely-culturally-known convention of code to use parentheses for function calls, we don't want to do this.
+
+Clojure, being a Lisp, articulates a profound homology between lists and function arguments. And: lists in Lisps are not only literals but also have variable lengths. That means variadic functions with an indefinite number of arguments are easy. In Clojure, you write it `(defn foo [x y z &more] ... )`, and `more` is bound to a list (well, vector) of any arguments more than 3 you give to `foo`. Call these "rest" arguments. Ludus does not have these. This is for technical reasons (outlined above), but also for aesthetic ones. The idea is that Ludus is meant to be very, very explicit; its design is meant to make explicitness easy. So we give ourselves 
+
+So Ludus follows Elixir here, it's easy to have variadic functions. Or, to be precise, it's easy to have multiple functions with the same name with different arities (all of which are explicit). In Elixir, the function name includes the arity, e.g. `foo/2` and `foo/3` are different functions. Using the function name without the arity suffix is sugar, since the number of arguments applied to the function is known at compile time. This is the strategy Ludus will take, although Ludus will elevate this from sugar to language. So inside of Ludus, you'll never know that `foo/2` and `foo/3` are implemented as different functions; there will be no way to differentiate between function arities in this way. But! To make Ludus function calls as fast as possible (even with the treewalk interpreter in Clojure), we will use this strategy under the hood. 
+
+And yet, there are more than a few core language features that feel like they want indefinitely-variadic behavior: `string`, `print`, etc. Can we call these "special forms" and be done with it?
+
 ###### Commas
+Commas separate expressions in all collection literals. 
+
 Trailing commas are allowed in all collection literals.
 
 Newlines also serve as separators between items in all collection literals.
@@ -68,7 +86,7 @@ Newlines also serve as separators between items in all collection literals.
 Multiple separators (commas, newlines) between items in all collection literals (or multiple trailing commas) are treated as separating a single element: collections are always dense (never sparse). So the following are equivalent:
 
 ```
-(1, 2, 3)
+(1, 2, 3) & the below all resolve to this
 
 (1
 2
@@ -117,8 +135,11 @@ There will be some level of syntactic sugar for dealing with hashmaps. Possibili
 * Bound name shorthands: If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo <- 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
 * Colon placement: the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
 
+###### Unresolved not-quite-design-decision: Naming hashmaps
+One of the nice points of "20 Things" is that Logo is not just a language, but also (among other things!) a vocabulary for talking about things. A hashmap is a nice, explicit term for what this collection is (it has other names). But it is jargony. Other possibilities for Ludus: object, dictionary, map, hash. We should resolve this. Partly because the syntax here, beginning with `#{`, is meant to be a visual cue to "hash": now that we have hashtags, this looks obviously like a hash-thing.
+
 ##### Sets
-Sets are unordered, unindexed collections of unique items (of any value). They are written between curly braces, introduced by a dollar sign: `${"foo", :bar, 3.14, "foo"} &=> ${"foo", :bar, 3.14}`. Note that `${1, 2, 3}` and `${3, 2, 1}` are equal.
+Sets are unordered, unindexed collections of unique items (of any value). They are written between curly braces, introduced by a dollar sign: `${"foo", :bar, 3.14, "foo"} &=> ${"foo", :bar, 3.14}`. Note that `${1, 2, 3}` and `${3, 2, 1}` are equal. (The dollar sign looks like an S, for set.)
 
 #### Operators
 Ludus has very small set of operators: assignment (`<-`), splat (`...`), pipeline (`|>`), and match (`->`). The use of these is described below.
@@ -126,13 +147,15 @@ Ludus has very small set of operators: assignment (`<-`), splat (`...`), pipelin
 #### Function application
 Ludus has a great many built-in functions (especially since there are no basic operators for things like addition!). Functions can be variadic (take different numbers of arguments, with different behaviours based on those numbers). Functions are written by writing the name of the function as a word with the arguments following in a tuple literal: `foo (bar, baz)`. (Note that the space the function name and arguments tuple is idiomatic, but optional: `foo(bar, baz)` is valid Ludus.) To invoke a function with zero arguments, use the empty tuple: `quux ()`.
 
-An attempt to invoke a function (putting a tuple after an expression) with something that is not a function will raise an error. (Hopefully more helpful than the traditional JavaScript headdesk of `undefined (read: nil) is not a function`.)
+A function name without a tuple following is treated as a reference to that function.
+
+An attempt to invoke a function (putting a tuple after an expression) with something that is not a function will raise an error. (Hopefully with a message that is more helpful than the traditional JavaScript headdesk of `undefined (read: nil) is not a function`.)
 
 ##### Partial application
-Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder, and all partially applied functions are unary.
+Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder in a tuple applied to a function. As a consequence, all partially applied functions are unary.
 
 ##### Pipeline application
-Ludus also allows for function pipelines. The last example above could be written `2 |> add (1, _) &=> 3`. Pipelines may be chained: `2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36`. The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that the single argument on the left-hand side of the pipline operator is aligned with single-placeholder partial application.
+Ludus also allows for function pipelines. The last example above could be written `2 |> add (1, _) &=> 3`. Pipelines may be chained: `2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36`. The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions.
 
 #### Patterns and assignment
 Ludus uses pattern matching from the ground up: all assignments are actually patterns. Patterns, generally, do two things: they match (against a value), and they bind names (in a scope).
@@ -147,12 +170,12 @@ To bind a name, the left hand side of an assignment can be a word: `foo <- true`
 The placeholder also always matches, but does not bind a name: `_ <- :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
 
 ##### Collections
-Ludus also allows you to match against collection literals. This is extremely useful and powerful. They are fairly intuitive.
+Ludus also allows you to match against collection literals. This is extremely useful and powerful. They are fairly intuitive. Patterns may be nested.
 
 ###### Tuples
 Tuples will match if the left and right hand sides are the same length, and that the values at each position match. `(x, y) <- (1, 2)` matches, and binds `x` to `1` and `y` to `2`. `(_, y) <- (1, 2)` matches, ignores the first member of the right-hand tuple, and binds `y` to `2`. `(x, y, z) <- (1, 2)` will not match and raise an error. 
 
-Tuple literals also match against themselves `(1, 2) <- (1, 2)` matches and binds no names.
+Tuple literals also match against themselves: `(1, 2) <- (1, 2)` matches and binds no names.
 
 The empty tuple matches against the empty tuple: `() <- ()`.
 
@@ -189,7 +212,7 @@ new_users <- #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 ```
 
-Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples (eds: _probably not!_); lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-conversions tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
+Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples (eds: _probably not!_); lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-type-casts tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
 
 #### Expressions, blocks, scope, and scripts
 Ludus is, exclusively, an expression-based language: everything returns a value. (Even assignment!; more on this below.) Expressions are separated by newlines or by semicolons.
@@ -202,7 +225,7 @@ false; true & there are two expressions on this line
 add (1, 2, 3)
 ```
 
-Eech line is evaluated on its own, and returns the value to which it evaluates. Literals (naturally) evaluate to themselves. Function calls are invoked and return their return value. Bound names return the value that is bound to them. Unbound names raise errors (they cannot be evaluated).
+Each line is evaluated on its own, and returns the value to which it evaluates. Literals (naturally) evaluate to themselves. Function calls are invoked and return their return value. Bound names return the value that is bound to them. Unbound names raise errors (they cannot be evaluated).
 
 ##### Blocks
 A block is a group of expressions that are evaluated in order, together, which returns the value of the last expression. Blocks are wrapped in curly braces: `{1; 2; 3} &=> 3`. A block is treated as a single expression by code outside it. So, you could write:
@@ -213,7 +236,7 @@ foo <- {
   "am"
   :a
   "block"; "."
-  add (1, 2, 3)
+  sum ([1, 2, 3])
 }
 ```
 
@@ -223,8 +246,9 @@ foo <- {
 Each block also introduces its own (lexical) scope. So any bindings introduced in a block are freed once the block is closed. Consider:
 
 ```
+my_uncool_number <- 4
 my_cool_number <- {
-  sum <- add (1, 2, 3)
+  sum <- add (2, my_uncool_number) &=>6; has access to the encolsing scope
   product <- mult (sum, 2)
   third <- div (product, 3)
   third
@@ -233,9 +257,9 @@ my_cool_number &=> 4
 sum &=> error! unbound name
 ```
 
-`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely be written as a pipeline: `my_cool_number <- add (1, 2, 3) |> mult (_, 2) |> div (_, 3)`).
+`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `my_cool_number <- my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
 
-Each block has access to any enclosing scope(s), up to the script level, and to the prelude.
+Each block has access to any enclosing scope(s), up to the script level, and then to the prelude.
 
 ##### Scripts
 Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `foo <- import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
@@ -243,12 +267,16 @@ Ludus is, at its heart, a scripting language. Each file, called a script, is its
 ###### Unresolved design decisions: assignments and bindings
 * _What do assignments return?_ One version is that, if there's a match, they simply return the right-hand side. The other version is that they return a special `Nothing` value that never matches against anything in any pattern, ever (and thus will throw an error if one puts a binding as the last line in a block). I'm inclined to say the former, but had originally considered the latter. _Temporary answer: return RHS._
 * _Can bindings be shadowed?_ Can a name be bound in an enclosing scope, and then bound in an included scope? Clearly, the interior binding would not affect the binding in its enclosing scope. I am very ambivalent about this. _Temporary answer: yes, shadowing_.
+* _REPL vs. script._ The REPL will be largely useless if you cannot re-bind a name in a session. But: that then means that scripts and REPLs have different rules, and you can't copy between them. This is rather a conundrum. So, a few possibilities:
+  - Just embrace the different rules. This is what OCaml does.
+  - Allow name-rebinding, to make scripts follow REPL rules. I don't like this, as it brings mutation into the picture unmanaged. And part of the Ludus way is to embrace as much strictness and explicitness as you can get in a dynamic language.
+  - Use a different model of interactivity: no Ludus REPL. We have a version of this: the notebook. This, right now, is my preferred suggestion. (You could use something like Quokka [for JS] or ClojureSublimed in a code editor.) That said, a notebook is *substantially* more complex as a piece of software (even with plugins for a code editor) than a REPL.
 
 #### Conditional forms
 Ludus has three main control flow constructs, called "conditional forms": `if`, `cond`, and `match`. All three are expressions, not statements.
 
 ##### `if`
-`if` is fairly unusual in Ludus, in that it comes with two additional reserved words, `then` and `else`. Also, note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
+`if` comes with two additional reserved words, `then` and `else`. `if` is binary: it decides which expression to evaluate based on a condition expression. Note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
 
 Newlines may come after the various expressions, e.g.:
 
@@ -264,7 +292,7 @@ if condition
 (Indentations are not significant in Ludus, but are considered good practice for code readability.)
 
 ###### Truthy and falsy
-`if` evaluates `else_expr` if the value of `test_expr` is `nil` or `false`. Otherwise, it evaluates `then_expr`.
+`if` evaluates `else_expr` if the value of `test_expr` is `nil` or `false`. Otherwise, it evaluates `then_expr`. (Do we want any other values to be falsy? E.g., `()`. Note that in any event, `0` and `""` are truthy, unlike in JS/PHP.)
 
 ##### `cond`
 `cond` is a way of testing multiple conditions without nesting `if` expressions. It is the first example of a clause-based expression (`match` and function bodies are also clause-based.) Consider the example:
@@ -281,7 +309,7 @@ cond {
 }
 ```
 
-`cond` is followed by curly braces, but instead of a block of expressions, it is a block of one or more _clauses_. For `cond`, the clause is written `<test_expr> -> <result_expr>`. If `test_expr` evaluates to truthy, `result_expr` is evaluated, and its value returned. No other clauses are evaluated (there is no fallthrough). If no clause's `test_expr` evaluates to truthy, no code is evaluated--and an error is raised. To write a default case, you have a few options. Any literal truthy value will do the trick. Best practice here would be the reserved word `else`, or the placeholder (`_`, as above).
+`cond` is followed by curly braces, but instead of a block of expressions, it is a block of one or more _clauses_. For `cond`, the clause is written `<test_expr> -> <result_expr>`. If `test_expr` evaluates to truthy, `result_expr` is evaluated, and its value returned. No other clauses are evaluated (there is no fallthrough). If no clause's `test_expr` evaluates to truthy, no code is evaluated--and an error is raised. To write a default case, you have a few options. Any literal truthy value will do the trick. But there are two syntactically-supported best practices: use the reserved word `else`, or the placeholder (`_`, as above).
 
 As with all expressions, you may use a block in either side of a clause (although it's ugly and not recommended to use one on the left-hand side).
 
@@ -326,10 +354,10 @@ As with `cond`, if no clause matches, an error is raised. Also, as with `cond`, 
 Best practice is to use `else` or `_` for default cases in both `cond` and `match`, since they behave similarly in all conditional forms. If you use a literal truthy value to form your default clause in `cond`, that is substantially different behaviour than using a literal value in `match` (which will only match on equality).
 
 ###### Unresolved design decisions
-* _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: errors on unused bound names._
+* _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: warnings (maybe) on unused bound names._
     - _Descriptive placeholders?_ You can use a placeholder in multiple places in a pattern, but they all look equivalent. Do we want to allow `_foo` names, which aren't bound but _do_ offer the possibility of a descriptive name. _Temporary answer: yes descriptive placeholders._
-* _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Temporary answer: errors on definitely unreachable clauses._ That said, this is the stupid version of this: we don't do exhaustiveness checking, so you'll only get an error after a clause that always matches.
-* _`with`?_ The `with` here is actually not necessary. It gives the syntax some breathing room. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Temporary answer: none; keep working on our intuitions._ One possible solution that runs the consistency the other way: use `do` for expression blocks. But that's gonna feel cluttered... 
+* _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Temporary answer: errors on definitely unreachable clauses._ That said, this is the stupid version of this: we don't do exhaustiveness checking, so you'll only get an error after a clause that always matches (e.g., `_` or `else`).
+* _`with`?_ The `with` here is actually not necessary. It gives the syntax some ventilation. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Temporary answer: none; keep working on our intuitions._ One possible solution that runs the consistency the other way: use `do` for expression blocks. But that's gonna feel cluttered... 
 
 #### Functions
 Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntaxes. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
@@ -412,7 +440,7 @@ fn add {
   () -> 0
   (x) -> x
   (x, y) -> {...native code...}
-  & NB: this example may be obsolete (see note on tuple splats)
+  & NB: this example may be obsolete (see notes on tuple splats)
   (x, y, ...more) -> {
     sum <- add (x, y)
     add (sum, ...more)
@@ -479,7 +507,7 @@ fn map {
 This is tail recursive, and thus can be optimized by Ludus to run quickly. Note that getting something into tail-recursive form often involves introducing a "helper" argument.
 
 ###### Unresolved design decisions
-* _Looping forms._ Is it worth building in looping forms, e.g. Clojure's `loop`/`recur`? Or Logo's `repeat`? Part of this is a pedagogical decision about managing early turtle graphics, e.g. `repeat 4 { forward (50); right (90) }` vs `repeat (4, fn () -> { forward (50); right (90) })`. I think my preference is for the functional version of `repeat`, but I can see an argument for special syntax here. 
+* _Looping forms._ Is it worth building in looping forms, e.g. Clojure's `loop`/`recur`? Or Logo's `repeat`? Part of this is a pedagogical decision about managing early turtle graphics, e.g. `repeat 4 { forward (50); right (90) }` vs `repeat (4, fn () -> { forward (50); right (90) })`. I think my preference is for the functional version of `repeat`, but I can see an argument for special syntax here. (Or rather, I flip-flop a lot on this.)
 
 As for direct looping, one nice thing about a `loop`/`recur` construct may be that it can enforce tail recursion (which we should not do for functions). That said, we can introduce `recur` as a reserved word which will raise an error if it is not in tail position in a function expression. Nevertheless, consider the following:
 ```
@@ -610,29 +638,35 @@ One possible restriction to avoid deeply-nested patterns is to avoid named patte
 Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Temporary decision: wait and see; don't add this yet._
 
 ###### Thought: finer-grained "types"
-Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions._ But also: see the next unresolved design decision: guards and named patterns are a robust _predicate_ DSL, where you can tell if a value conforms to a shape that you've named. But it's _not_ a type system, in the sense that you can't climb back up from the value to some more general category.
+Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions. (Although: you could disallow `when` in named patterns.)_ But also: see the next unresolved design decision: guards and named patterns are a robust _predicate_ DSL, where you can tell if a value conforms to a shape that you've named. But it's _not_ a type system, in the sense that you can't climb back up from the value to some more general category.
 
 #### Unresolved design decision: polymorphism
 I don't believe this is deeply urgent, since if we get some well-designed abstractions (which I think these are!; I am standing on the shoulders of Rich Hickey), polymorphism isn't actually much of a problem. There aren't user-defined types, so there is no need to require user-facing extensions. But we can use the same basic foundation for polymorphism I used in the original JavaScript-hosted Ludus, which allows for user-defined types that can be associated with namespaces to produce module. Again, I want to see how far we can get without module-based (or other) polymorphism. Convention (e.g., result tuples) over polymorphism, to abuse the Rails mantra.
+
+To which I add: this is actually pretty close to the Logo/Scheme type system, where user-defined types just aren't a thing. This cuts against the forms of polymorphism in modern languages (including Elixir and Clojure). They each have useful polymorphic models we can easily integrate into Ludus without too much retrofitting.
  
 #### Equality
-All equality in Ludus is value-equality--with one exception. Functions are reference-equal (testing for function equality is probably... not a thing you should be doing very often). All atomic and collection values are compared based on value using the `eq` function. So, e.g., `eq (${1, 2, 3}, ${3, 2, 1}, ${2, 3, 1}) &=> true`
+All equality in Ludus is value-equality--with one exception. Functions are reference-equal (testing for function equality is probably... not a thing you should be doing very often). All atomic and collection values are compared based on value using the `eq` function. So, e.g., `eq (${1, 2, 3}, ${3, 2, 1}, ${2, 3, 1}) &=> true`.
 
 #### Events and asynchronicity
 **This section needs much more research.**
 
-Asynchronicity is hard no matter how you do it. But the single-threaded JavaScript event loop is likely a good model. (Look to inspiration from Pyret.) I believe it's easy enough to implement with a single reserved word, `defer <time> <expr>`, which bumps a computation to the next tick.
+Asynchronicity is hard no matter how you do it. But the single-threaded JavaScript event loop is likely a good model. (Also, look to inspiration from Pyret.) I believe it's easy enough to implement with a single reserved word, `defer <expr>`, which bumps a computation to the next tick, and perhaps `wait <time> <expr>`.
 
 #### Errors
 **This section is very tentative.** And involves lots of thinking-through. 
  
-As a learner-oriented language, Ludus must have excellent and informative error messages.One lesson from static languages is that it's best to get errors as early as possible in the process, bringing as many runtime errors forward as possible to earlier stages in interpretation.
+As a learner-oriented language, Ludus must have excellent and informative error messages. One lesson from static languages is that it's best to get errors as early as possible in the process, bringing as many runtime errors forward as possible to earlier stages in compilation/interpretation.
 
-In addition, it's worth holding onto a basic distinction between errors in business logic and errors in code. Calling a function with the wrong number or type of arguments is not an error a system tolerates; whereas division by zero or not getting the right input from a user should not bring down a system. Result tuples are our friends for the latter (in the absence of parametric static types). The former should, in fact, halt the world.
+In addition, it's worth holding onto a basic distinction between errors in business logic and errors in code. Calling a function with the wrong number or type of arguments is not an error a system tolerates; whereas division by zero or not getting the right input from a user should not bring down a system. Result tuples are our friends for the latter (in the absence of parametric static types, e.g. `Result<T, E>`). The former should, in fact, halt the world.
 
 Pattern matching will driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
 
 The thought for now: there should be no user-facing error system other than returning error tuples, and maybe `panic!`. Let's see how far we can get before we need to `raise` anything (although obviously that will be a reserved word).
+
+This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust: you have results and panics, and that's it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there). (Consider also the Go model.) 
+
+##### U
 
 #### Reserved words
 In this document so far, here is the complete list of Ludus reserved words.
@@ -648,7 +682,7 @@ Others that are possible are:
 
 #### Some nice-to-haves
 * Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions), or, approaching it from a different perspective, a `try`/`catch`-like construct, where match errors are swallowed. (But we want to avoid exceptions!).
-* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `myfn <- f | g | h` or `myfn <- h . g . f`.
+* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `myfn <- f | g | h` or `myfn <- h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. (But: consider transducers, which we'll use extensively.)
 * Generators & iterators (this could be syntactic sugar!, but will likely be optimized away), e.g.:
 ```
 counter_to_3 <- {
@@ -721,12 +755,12 @@ fn range with {
 
 Generators may well be a later nice-to-have, but I suspect the protocol (dead simple, cribbed largely from JS) will be pretty core, and need to be established pretty early.
 
-##### Protocols in the language
+##### Protocols & conventions in the language
 Following on the convention here of `(:value, x)/(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` operator, which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function.)
-* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the `=>` operator should short-circuit on `nil`?
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function.)
+* Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil`?
 
 #### Special forms
 There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
@@ -750,3 +784,4 @@ Error handling is so, so very important to Ludus. I'm mostly cribbing from other
 * Should it be possible to "demote" a lexical, syntax, or logic error to something like a result? In practice, this may be useful (if only very rarely used). Consider:
   * `handle <expr>`: The expression after `handle` may panic. If it doesn't, just return the value of the expression, `value`, in a result tuple: `(:ok, value)`. If it does, return `(:error, message)` (with `nil` as the message for a bare panic).
   * I suspect that `handle`ing panics will mostly be useful for things like writing a REPL, but should be avoided if not omitted from the language.
+* A deep thought, related to error handling and also name binding behavior: perhaps a REPL really is the wrong model. The notebook/script model may well be more interesting. Particularly to the extent that non-recoverable panics and statically bound names both really militate against the REPL, but work perfectly well with the notebook version. (And, since we're thinking transitional objects here: a notebook/file in an editor is something learners will be comfortable with, where an interactive REPL prompt is actually *not* something most will be comfortable with.)
