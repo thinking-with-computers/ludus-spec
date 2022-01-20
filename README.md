@@ -673,9 +673,7 @@ Pattern matching will driving most of the runtime errors we'll get (call a funct
 
 The thought for now: there should be no user-facing error system other than returning error tuples, and maybe `panic!`. Let's see how far we can get before we need to `raise` anything (although obviously that will be a reserved word).
 
-This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust: you have results and panics, and that's it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there). (Consider also the Go model.) 
-
-##### U
+This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust: you have results and panics, and that's it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there). (Consider also the Go model.)
 
 #### Reserved words
 In this document so far, here is the complete list of Ludus reserved words.
