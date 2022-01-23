@@ -566,6 +566,9 @@ cant_count &=> 0
 mut cant_count <- inc (cant_count) &=> error!
 ```
 
+##### `var`s must be simple names
+The left hand side of a `var` match must be a simple name, not a destructuring pattern match.
+
 #### Closures
 Note that in the `count_up` example, `increment_counter` is able to access `a_counter`, which is _not_ accessible outside that block. `increment_counter` _closes over_ its lexical scope, and can continue to access it. (It can also close over things all the way up to the script level. Nothing in the prelude is mutable, so it doesn't matter.) This allows for the very careful and explicit management of mutable state.
 
@@ -638,6 +641,9 @@ add_strings_or_numbers ("foo", 4) &=> error!
 
 This is a simple but quite robust form of type-checking that allows for polymorphic behaviours. It is somewhat verbose, but that discourages overly-ambitious typechecking. The prelude/standard library will be typechecked in this way.
 
+###### Unresolved design decision: alternative for as: `::`
+In place of `as :number`, we could also (instead?) use a shorthand cribbed from Haskell-world, `::`, which is prounced "has type of." So, `(x::number)` or `(x ::number)`, instead of `(x as :number)`. It's more concise, but therefore also possiblhy more inscrutable. To consider.
+
 ##### Unresolved design decision: named patterns
 This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._
 
@@ -673,7 +679,16 @@ Pattern matching will driving most of the runtime errors we'll get (call a funct
 
 The thought for now: there should be no user-facing error system other than returning error tuples, and maybe `panic!`. Let's see how far we can get before we need to `raise` anything (although obviously that will be a reserved word).
 
-This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust: you have results and panics, and that's it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there). (Consider also the Go model.)
+This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust/Go: you have results and panics, and that's more or less it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there).
+
+#### Static analysis
+Following from commitments to good & early errors, Ludus should do aggressive static analysis to discover errors early. We do it when we can, for the most common use cases. It will be possible to frustrate static analysis by doing things in obscurantist ways, but if you stay on the static-analysis happy path, you'll get something pretty robust. So, for example, I think we can get (for things that might normally be dynamic):
+* Function arity checking.
+* Namespace member access.
+* Mutation out-of-scope.
+* Unbound names.
+* Attempted mutation of non-`var` bindings.
+* Re-binding a bound name.
 
 #### Reserved words
 In this document so far, here is the complete list of Ludus reserved words.
@@ -761,7 +776,7 @@ fn range with {
 Generators may well be a later nice-to-have, but I suspect the protocol (dead simple, cribbed largely from JS) will be pretty core, and need to be established pretty early.
 
 ##### Protocols & conventions in the language
-Following on the convention here of `(:value, x)/(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
+Following on the convention here of `(:value, x)`/`(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
 * Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`)
