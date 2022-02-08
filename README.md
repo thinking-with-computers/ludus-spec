@@ -50,7 +50,7 @@ Ludus defines some (which?) constants, with specific names. `Infinity`, `Pi`, an
 Keywords evaluate to themselves and only to themselves. They are written as a word preceded by a colon: `:keyword`, `:foo`, `:n00b`. They have the same naming rules as words. They must begin with a colon, and then a letter, and then any character that is not a word-terminator (e.g. whitespace). `:n00b` will be the same value no matter where it's written (and different from every other keyword).
 
 ###### Terminators
-Characters that terminate words: here's the set of terminator characters (as Clojure characters): `\: \; \newline \space \tab \{ \( \[ \$ \# \- \< \& \,`.
+Characters that terminate words: here's the set of terminator characters (as Clojure characters): `\: \; \newline \space \tab \{ \} \( \) \[ \] \$ \# \- \< \& \, \|`.
 
 ##### Strings
 UTF8 strings are set off by double quotes: `"this is a string"`. Strings may be split across lines with a `\` before the newline. (Strings are also complicated!)
@@ -73,7 +73,7 @@ It's worth tracing the design space here, because the three langauges that are s
 
 Logo is the weirdest among these. Logo has no variadic functions; every function has a known arity. In addition, because Logo was set on getting rid of Lisp's parentheses for kids, function calls don't have parentheses: they're just lists of arguments separated by spaces after a function, e.g. `FLOWER 100 50`. But that means the _parser_ has to know the arities of functions to decide what arguments belong to which function call. Among other decisions, this is one that makes Logo extremely weird compared to modern languages. Since the target audience of Ludus isn't young kids, and because there's a widely-culturally-known convention of code to use parentheses for function calls, we don't want to do this.
 
-Clojure, being a Lisp, articulates a profound homology between lists and function arguments. And: lists in Lisps are not only literals but also have variable lengths. That means variadic functions with an indefinite number of arguments are easy. In Clojure, you write it `(defn foo [x y z &more] ... )`, and `more` is bound to a list (well, vector) of any arguments more than 3 you give to `foo`. Call these "rest" arguments. Ludus does not have these. This is for technical reasons (outlined above), but also for aesthetic ones. The idea is that Ludus is meant to be very, very explicit; its design is meant to make explicitness easy. So we give ourselves 
+Clojure, being a Lisp, articulates a profound homology between lists and function arguments. And: lists in Lisps are not only literals but also have variable lengths. That means variadic functions with an indefinite number of arguments are easy. In Clojure, you write it `(defn foo [x y z &more] ... )`, and `more` is bound to a list (well, vector) of any arguments more than 3 you give to `foo`. Call these "rest" arguments. Ludus does not have these. This is for technical reasons (outlined above), but also for aesthetic ones. The idea is that Ludus is meant to be very, very explicit; its design is meant to make explicitness easy.
 
 So Ludus follows Elixir here, it's easy to have variadic functions. Or, to be precise, it's easy to have multiple functions with the same name with different arities (all of which are explicit). In Elixir, the function name includes the arity, e.g. `foo/2` and `foo/3` are different functions. Using the function name without the arity suffix is sugar, since the number of arguments applied to the function is known at compile time. This is the strategy Ludus will take, although Ludus will elevate this from sugar to language. So inside of Ludus, you'll never know that `foo/2` and `foo/3` are implemented as different functions; there will be no way to differentiate between function arities in this way. But! To make Ludus function calls as fast as possible (even with the treewalk interpreter in Clojure), we will use this strategy under the hood. 
 
@@ -584,7 +584,7 @@ Hashmaps are used extensively to create packages of functions.
 Property access on any value that is not a hashmap returns `nil`.
 
 ##### Unresolved design decision: namespaces
-Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo <- import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo:inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace foo`.
+Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo <- import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo:inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
 
 That would give us a syntactical form something like:
 
@@ -599,6 +599,7 @@ ns Foo {
   dec
 }
 ```
+One additional nicety, here. Namespaces will be statically known at compile-time: they may only have bound names as their members. What's the one-line delimiter: , or ;?
 
 #### Types and patterns
 **This section is very tenative.**
@@ -614,7 +615,7 @@ Ludus has a strictly limited number of types, which correspond to the literal va
 * Hashmap
 * Set
 * Function
-* Namespace?
+* Namespace
 * Generator/iterator/sequence?
 
 There are no user-defined types. (Really?) None of these types are parametric. So a list is a list is a list.
@@ -642,7 +643,7 @@ add_strings_or_numbers ("foo", 4) &=> error!
 This is a simple but quite robust form of type-checking that allows for polymorphic behaviours. It is somewhat verbose, but that discourages overly-ambitious typechecking. The prelude/standard library will be typechecked in this way.
 
 ###### Unresolved design decision: alternative for as: `::`
-In place of `as :number`, we could also (instead?) use a shorthand cribbed from Haskell-world, `::`, which is prounced "has type of." So, `(x::number)` or `(x ::number)`, instead of `(x as :number)`. It's more concise, but therefore also possiblhy more inscrutable. To consider.
+In place of `as :number`, we could also (instead?) use a shorthand cribbed from Haskell-world, `::`, which is prounced "has type of." So, `(x::number)` or `(x ::number)`, instead of `(x as :number)`. It's more concise, but therefore also possibly more inscrutable. To consider.
 
 ##### Unresolved design decision: named patterns
 This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._
@@ -650,7 +651,9 @@ This one is... interesting. I haven't quite seen it elsewhere (maybe in one of B
 One possible restriction to avoid deeply-nested patterns is to avoid named patterns at all! No named patterns in the definition of named patterns.
 
 ##### Unresolved design decision: guards in patterns
-Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Temporary decision: wait and see; don't add this yet._
+Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Temporary decision: wait and see; don't add this yet._ 
+
+On Elixir's guards: https://hexdocs.pm/elixir/patterns-and-guards.html#guards
 
 ###### Thought: finer-grained "types"
 Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions. (Although: you could disallow `when` in named patterns.)_ But also: see the next unresolved design decision: guards and named patterns are a robust _predicate_ DSL, where you can tell if a value conforms to a shape that you've named. But it's _not_ a type system, in the sense that you can't climb back up from the value to some more general category.
