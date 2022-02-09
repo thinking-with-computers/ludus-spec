@@ -164,28 +164,33 @@ Ludus also allows for function pipelines. The last example above could be writte
 Ludus uses pattern matching from the ground up: all assignments are actually patterns. Patterns, generally, do two things: they match (against a value), and they bind names (in a scope).
 
 ##### Basic matching & assignment
-The most basic pattern match is assignment, which uses the assignment operator, or left-pointing arrow: `<-`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `true <- true`, `42 <- 42`, `"foo" <- "foo"`, `[1, 2, 3] <- [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below).
+The most basic pattern match is assignment, which uses the keyword `let` and the assignment operator, or left-pointing arrow: `<-`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `let true <- true`, `let 42 <- 42`, `let "foo" <- "foo"`, `let [1, 2, 3] <- [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below).
+
+###### New design decision: `let`
+I had an idea like it might be possible and desirable to do without `let` (as Elixir does), but I can tell as I embark on the parser that parsing will be made much easier if we include `let` as a keyword that preceds assignment. (That way, the parser doesn't have to do nearly indefinite lookahead to determine whether you're dealing with a collection literal or a collection pattern.)
+
+That said, it actually improves code readability to have all assignments set off by `let`s. So.
 
 ##### Words
-To bind a name, the left hand side of an assignment can be a word: `foo <- true`. The name `foo` is now bound to the value `true`, and anywhere `foo` is used, it will evaluate to `true`. (Note that names may not be re-bound in the same scope; see below.) Words always match against any value. So `names <- ${"Pat", "Chris", "Gabe"}` matches, and binds `names` to the set with names in them (so that `contains? ("Pat", names) &=> true`).
+To bind a name, the left hand side of an assignment can be a word: `let foo <- true`. The name `foo` is now bound to the value `true`, and anywhere `foo` is used, it will evaluate to `true`. (Note that names may not be re-bound in the same scope; see below.) Words always match against any value. So `let names <- ${"Pat", "Chris", "Gabe"}` matches, and binds `names` to the set with names in them (so that `contains? ("Pat", names) &=> true`).
 
 ##### Placeholder
-The placeholder also always matches, but does not bind a name: `_ <- :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
+The placeholder also always matches, but does not bind a name: `let _ <- :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
 
 ##### Collections
 Ludus also allows you to match against collection literals. This is extremely useful and powerful. They are fairly intuitive. Patterns may be nested.
 
 ###### Tuples
-Tuples will match if the left and right hand sides are the same length, and that the values at each position match. `(x, y) <- (1, 2)` matches, and binds `x` to `1` and `y` to `2`. `(_, y) <- (1, 2)` matches, ignores the first member of the right-hand tuple, and binds `y` to `2`. `(x, y, z) <- (1, 2)` will not match and raise an error. 
+Tuples will match if the left and right hand sides are the same length, and that the values at each position match. `let (x, y) <- (1, 2)` matches, and binds `x` to `1` and `y` to `2`. `let (_, y) <- (1, 2)` matches, ignores the first member of the right-hand tuple, and binds `y` to `2`. `let (x, y, z) <- (1, 2)` will not match and raise an error. 
 
-Tuple literals also match against themselves: `(1, 2) <- (1, 2)` matches and binds no names.
+Tuple literals also match against themselves: `let (1, 2) <- (1, 2)` matches and binds no names.
 
-The empty tuple matches against the empty tuple: `() <- ()`.
+The empty tuple matches against the empty tuple: `let () <- ()`.
 
 ###### Unresolved design decision: tuple splats
 **This appears as resolved throuhgout, but it, in fact, not.**
 
-_The original text here:_ There is one exception to the length-match requirement: a tuple pattern may also have a "rest pattern" (or splat), which matches any remaining members in the tuple, e.g.: `(x, y, ...more) <- (1, 2, 3, 4)` binds `x` to `1`, `y` to `2`, and `more` to `(3, 4)`. Meanwhile, `(1, _, ...more) <- (1, 2)` matches, and binds `more` to `()` (the empty tuple).
+_The original text here:_ There is one exception to the length-match requirement: a tuple pattern may also have a "rest pattern" (or splat), which matches any remaining members in the tuple, e.g.: `let (x, y, ...more) <- (1, 2, 3, 4)` binds `x` to `1`, `y` to `2`, and `more` to `(3, 4)`. Meanwhile, `let (1, _, ...more) <- (1, 2)` matches, and binds `more` to `()` (the empty tuple).
 
 _Deep thoughts:_ Tuples have to be *fast* (for fast function application and pattern matching), and one way to help make them fast is to ensure that they have lengths that are statically known at compile time. Clojure (as a Lisp) has a deep structural homology between lists and arguments. But Elixir, whose pattern matching I'm cribbing from, does not: functions have their arity in their name, e.g. `add/0`, `add/1` and `add/2` are not different arities of the same function, but different functions.
 
@@ -203,19 +208,19 @@ Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the ri
 We've already seen the "rest" pattern. A similar technique can be used to insert all values from a collection into another collection. Consider:
 
 ```
-numbers <- [1, 2, 3]
-new_numbers <- [0, ...numbers]
+let numbers <- [1, 2, 3]
+let new_numbers <- [0, ...numbers]
 & new_numbers is [0, 1, 2, 3]
 
-users <- #{
+let users <- #{
   :Pat "pat@gmail.com"
   :Chris "chris@yahoo.com"
 }
-new_users <- #{:Ashley "ashley@outlook.com", ...users}
+let new_users <- #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 
 & however, this creates a new hashmap, more idiomatic (and faster) would be:
-new_users_update <- update (users, :Ashley, "ashley@outlook.com")
+let new_users_update <- update (users, :Ashley, "ashley@outlook.com")
 
 & either way, `users` is untouched
 users &=> #{:Pat "pat@gmail.com", :Chris "chris@yahoo.com"}
@@ -240,7 +245,7 @@ Each line is evaluated on its own, and returns the value to which it evaluates. 
 A block is a group of expressions that are evaluated in order, together, which returns the value of the last expression. Blocks are wrapped in curly braces: `{1; 2; 3} &=> 3`. A block is treated as a single expression by code outside it. So, you could write:
 
 ```
-foo <- {
+let foo <- {
   "I"
   "am"
   :a
@@ -255,23 +260,23 @@ foo <- {
 Each block also introduces its own (lexical) scope. So any bindings introduced in a block are freed once the block is closed. Consider:
 
 ```
-my_uncool_number <- 4
-my_cool_number <- {
-  sum <- add (2, my_uncool_number) &=>6; has access to the encolsing scope
-  product <- mult (sum, 2)
-  third <- div (product, 3)
+let my_uncool_number <- 4
+let my_cool_number <- {
+  let sum <- add (2, my_uncool_number) &=>6; has access to the encolsing scope
+  let product <- mult (sum, 2)
+  let third <- div (product, 3)
   third
 } &=> 4
 my_cool_number &=> 4
 sum &=> error! unbound name
 ```
 
-`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `my_cool_number <- my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
+`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `let my_cool_number <- my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
 
 Each block has access to any enclosing scope(s), up to the script level, and then to the prelude.
 
 ##### Scripts
-Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `foo <- import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
+Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `let foo <- import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
 
 ###### Unresolved design decisions: assignments and bindings
 * _What do assignments return?_ One version is that, if there's a match, they simply return the right-hand side. The other version is that they return a special `Nothing` value that never matches against anything in any pattern, ever (and thus will throw an error if one puts a binding as the last line in a block). I'm inclined to say the former, but had originally considered the latter. _Temporary answer: return RHS._
@@ -351,6 +356,7 @@ match do_something () with {
   }
 
   & because the previous clause always matches, we will never get here
+  & should this be a parser error?
   2 -> :never_matches
 }
 ```
@@ -451,7 +457,7 @@ fn add {
   (x, y) -> {...native code...}
   & NB: this example may be obsolete (see notes on tuple splats)
   (x, y, ...more) -> {
-    sum <- add (x, y)
+    let sum <- add (x, y)
     add (sum, ...more)
   }
 }
@@ -493,7 +499,7 @@ fn sum {
   ([]) -> 0
   ([x]) -> sum (x, 0)
   ([first, ...rest], n) -> {
-    running_total <- add (first, n) & broken out for pedagogical purposes
+    let running_total <- add (first, n) & broken out for pedagogical purposes
     sum (rest, running_total) & sum appears only as leftmost call on last line
   }
 }
@@ -589,9 +595,9 @@ Unstated here but completely anticipated is that a module/namespace/whatever is 
 That would give us a syntactical form something like:
 
 ```
-inc <- add(1, x)
+let inc <- add(1, x)
 
-dec <- sub(x, 1)
+let dec <- sub(x, 1)
 
 ns Foo {
   &&& a docstring could go here
@@ -714,7 +720,7 @@ counter_to_3 <- {
   var current <- 0
 
   fn next () -> {
-    out <- current
+    let out <- current
     mut current <- inc (current)
     if gt (current, 3)
       then (:done, nil)
@@ -736,7 +742,7 @@ counter_to_3:next () &=> (:done, nil)
 This could be rewritten as:
 
 ```
-conter_to_3 <- gen (0) with { 
+let conter_to_3 <- gen (0) with { 
   (current) -> {
     yield current
     if gt (current, 3)
