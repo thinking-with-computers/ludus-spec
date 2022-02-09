@@ -78,13 +78,13 @@ end
 & we represent a 2D vector as (x as :number, y as :number)
 
 fn add_2d (v1, v2) -> do
-  (x1 as :number, y1 as :number) = v1
-  (x2 as :number, y2 as :number) = v2
+  let (x1 as :number, y1 as :number) = v1
+  let (x2 as :number, y2 as :number) = v2
   (add (x1, x2), add (y1, y2))
 end
 
 fn mult_2d (scalar as :number, vector) -> do
-  (x as :number, y as :number) = vector
+  let (x as :number, y as :number) = vector
   (mult (scalar, x), mult (scalar, y))
 end
 
@@ -101,7 +101,7 @@ fn reduce
   (f, [first]) -> f (head)
   (f, [first, second, ...rest]) -> do
     & we can't just pass this along since we may get a :stop from the first application of the reducing function
-    result = f (first, second)
+    let result = f (first, second)
     match result with
       (:stop, value) -> value
       else -> reduce (f, rest, result)
@@ -109,7 +109,7 @@ fn reduce
   end
   (f, [], acc) -> acc
   (f, [first, ...rest], acc) -> do
-    result = f (acc, first)
+    let result = f (acc, first)
     & we want to be able to stop a reduction
     match result with
       (:stop, value) -> value
@@ -122,17 +122,17 @@ end
 
 & we represent a list as nested tuples
 
-fn cons
+fn cons with
   (item) -> (item, nil)
   (item, llist) -> (item, llist)
 end
 
-fn car
+fn car with
   (nil) -> nil
   ((item, _)) -> item
 end
 
-fn cdr
+fn cdr with
   (nil) -> nil
   ((_, llist)) -> llist
 end
@@ -140,7 +140,7 @@ end
 & a list
 cons (1, cons (2, cons (3))) &=> (1, (2, (3, nil)))
 
-fn each
+fn each with
   (nil) -> :ok
   ((item, llist)) -> do
     f (item)
@@ -148,12 +148,12 @@ fn each
   end
 end
 
-fn map
+fn map with
   (f, nil) -> nil
   (f, (item, llist)) -> cons (f (item), map (llist))
 end
 
-fn reduce
+fn reduce with
   (f, nil, acc) -> acc
   (f, (head, tail), acc) -> reduce (f, tail, f (acc, head))
 end
