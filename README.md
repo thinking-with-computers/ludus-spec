@@ -813,4 +813,23 @@ Error handling is so, so very important to Ludus. I'm mostly cribbing from other
 * Should it be possible to "demote" a lexical, syntax, or logic error to something like a result? In practice, this may be useful (if only very rarely used). Consider:
   * `handle <expr>`: The expression after `handle` may panic. If it doesn't, just return the value of the expression, `value`, in a result tuple: `(:ok, value)`. If it does, return `(:error, message)` (with `nil` as the message for a bare panic).
   * I suspect that `handle`ing panics will mostly be useful for things like writing a REPL, but should be avoided if not omitted from the language.
+  * For more on this, see [my meditation on errors](./errors.md).
 * A deep thought, related to error handling and also name binding behavior: perhaps a REPL really is the wrong model. The notebook/script model may well be more interesting. Particularly to the extent that non-recoverable panics and statically bound names both really militate against the REPL, but work perfectly well with the notebook version. (And, since we're thinking transitional objects here: a notebook/file in an editor is something learners will be comfortable with, where an interactive REPL prompt is actually *not* something most will be comfortable with.)
+
+#### Imports
+Originally, I had been thinking of imports as being on the model of Node's `require`: a function that took a string (path to a file), and returned the value of evaluating the script in the file. That's dead simple! But also makes a number of things we want to do much, much more complicated. For example, we want imports to be statically available at compile time, so that we can, say, blow up very early on accessing missing members of namespaces (instead of a runtime error).
+
+That suggests we want a special import construct: `import "foo.ld" as Foo`. This looks like a statement, but like a `let`, this simply evaluates to the return value of `foo.ld`. But also--and here's the thing we like--the way the parser is coming together, this lets us allow an `import` only in the script context. It cannot be in a block or in a function. (Shall we enforce ordering? Or is that too precious?)
+
+In addition, since Ludus has no provision for shared global state, there's execution of scripts that can be conditional on anything. (A script, of course, can contain conditional logic that might make its evaluation indeterminate--say, branching on a random number or the date--but it will _not_ take a different path depending on _what any other script does_. This isn't quite referential transparency, but it should be enough to allow for robust caching and static analysis, even in a dynamic language.
+
+Finally, as a possible nice shortcut, if a script, `quux.ld`, returns a namespace, `ns Quux { foo, bar, baz }`, then you can `import "quux.ld"` and if automagically binds that namespace to `Quux` in your script. This may or may not be advisable; it's not so much extra typing to write `as Quux`. Binding names should probably always be explicit?
+
+
+
+
+
+
+
+
+
