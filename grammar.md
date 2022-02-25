@@ -80,9 +80,24 @@ hashmap pattern -> (* TODO *)
 
 set pattern -> (* TODO *)
 
-pattern -> simple pattern | tuple pattern | list pattern | hashmap pattern | set pattern;
+collection pattern -> tuple pattern | list pattern | hashmap pattern | set pattern;
 
-assignment -> pattern, "<-", expression;
+pattern -> simple pattern | collection pattern;
+
+(* How do we restrict guard patterns? *)
+guard expression -> (* TODO *)
+
+complex pattern -> pattern, "when", guard expression;
+
+atom let -> "let", literal, "<-", expression;
+
+simple let -> "let", word, "<-", expression;
+
+pattern let -> "let", pattern, "<-", expression;
+
+complext let -> "let", complex pattern, "<-", expression;
+
+let -> atom let | simple let | pattern let | complex let;
 
 match terminator -> newline;
 
@@ -105,22 +120,33 @@ fn -> simple fn | complex fn;
 (* built-in "statements" *)
 panic -> "panic!", expression;
 
+test -> "test", string, expression;
+
 defer -> "defer", expression;
 
 repeat -> "repeat", number, expression;
 
-simple loop -> "loop", tuple, fn clause;
+simple loop -> "loop", tuple, "into", fn clause;
 
 complex loop -> "loop", tuple, "with", "{", {fn terminator}, fn clause, {fn terminator, {fn terminator}, fn clause}, {fn terminator}, "}";
 
+(*  *)
 yield -> "yield", expression;
 
-generator -> (* TODO *)
+gen expr -> expression | yield;
+
+gen clause -> tuple pattern, "->", gen expr;
+
+simple gen -> "gen", tuple, "into", gen clause;
+
+complex gen -> "gen", tuple, "with", "{", {fn terminator}, gen clause, {fn terminator, {fn terminator}}, gen clause}, {fn terminator}, "}";
+
+generator -> simple gen | complex gen;
 
 (* varibales and mutation *)
-variable -> "var", "word", "<-", expression;
+variable -> "var", word, "<-", expression;
 
-mutation -> "mut", "word", "<-", expression;
+mutation -> "mut", word, "<-", expression;
 
 expression terminator -> newline | ";" | eof;
 
@@ -129,17 +155,18 @@ ns terminator -> newline | ",";
 
 namespace -> "ns", word, "{", {ns terminator}, {word, {ns terminator, {ns terminator}, word}}, "}";
 
-expression -> {expression terminator}, (atom | collection | block | synthetic | assignment | conditional | fn | panic), expression terminator, {expression terminator};
+expression -> {expression terminator}, (atom | collection | block | synthetic | let | conditional | fn | panic), expression terminator, {expression terminator};
 
 ```
 
 What isn't yet in this grammar?
-* Generators
 * Splats for collections
+	- in expressions
+	- in patterns
 * Function pipelines (ugh, that's gonna be a doozie?)
-* Partial application
+* Partial application with placeholder
 * Continue expression on next line with `\`
 * Complex patterns
+	- collection patterns
 	- `as` patterns
 	- `when` guards
-	- splat patterns

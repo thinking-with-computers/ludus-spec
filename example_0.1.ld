@@ -96,7 +96,7 @@ end
 & algorithms
 & * reduce
 
-fn reduce
+fn reduce with
   (f, []) -> f ()
   (f, [first]) -> f (head)
   (f, [first, second, ...rest]) -> do
@@ -140,6 +140,17 @@ end
 & a list
 cons (1, cons (2, cons (3))) &=> (1, (2, (3, nil)))
 
+& list conj; assumes no conflict
+fn conj with
+  (llist) -> llist
+  (llist, item) -> cons (llist, item)
+end
+
+fn list_to_llist with
+  ([]) -> nil
+  ([head, ...tail]) -> reduce (conj, tail, cons (head))
+end
+
 fn each with
   (nil) -> :ok
   ((item, llist)) -> do
@@ -156,4 +167,28 @@ end
 fn reduce with
   (f, nil, acc) -> acc
   (f, (head, tail), acc) -> reduce (f, tail, f (acc, head))
+end
+
+let count_to_3 = gen (0) into 
+  (current) -> do
+    yield current
+    recur (inc (current))
+  end
+
+fn seq with
+  (h as :hashmap) -> seq (list (h))
+  (s as :set) -> seq (list (s))
+  (s as :string) -> seq (list (s))
+  (l as :list) -> gen (l) with
+    ([]) -> nil
+    ([first, ...rest]) -> do
+      yield first
+      recur (rest)
+    end
+  end
+end
+
+loop (0) into (n) -> do
+  print (n)
+  recur (inc (n))
 end

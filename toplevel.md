@@ -1,0 +1,15 @@
+# On the concept of a toplevel
+
+I had been rather insistent in my head that Ludus would not have a special "toplevel" context where special things could happen. A script is just a block without the braces! But that's actually not tractable, since scripts are in fact really not blocks. Scripts must return a value, yes. And they're evaluated just like a block, in the sense of allowing multiple expressions. But there must be some things we can do in scripts that we cannot do in blocks, to establish a baseline level of static analysis that will be very helpful for taming a dynamic language, and surfacing as many errors as you possibly can into compile-time, rather than runtime.
+
+I first discovered this when thinking about imports. We won't be able to do good static analysis if imports can be made conditionally, or parametrically. So: static imports! So, that means we have a special `import` expression (it's still an expression!--express all the things), which can only be called at the script or repl context. At that point, I didn't realize I was thinking about a toplevel.
+
+Just now, thinking about possible datatypes, and wanting to get exhaustive pattern matching, I realized we needed `data` expressions to only be made at a toplevel, never returned from functions. (I mean, you _can_ return a type from a function, but you can't use it like a datatype if you do.) And immediately after: also `ns` and `module` expressions.
+
+This means we do, ultimately, have two "realms": that which must be declared statically at the toplevel, and that which can be used anywhere. I realize that the main reason I didn't like about the OCaml/F# toplevel is that you can't use some forms in the toplevel (e.g., `let`), and it's got special syntax. But a softer toplevel, which can take (almost) anything (see below) and has identical syntax, but is the only place you can use certain forms--that makes me more comfortable.
+
+And it's super common to have different syntax possibilities in different contexts: `return` can only be used in functions in JS; `import` cannot be in a function. In Ludus, so far, `recur` may only be in loops and generators; and `yield` in generators.
+
+This does raise the question, however, of why not go all in on a static type system, which (beyond the complexity of writing a full HM type system with inference) is actually additional overhead burden for learners. Writing functions with type annotations is not good for your first langauge. Especially if you have to grok the parametric types that would be required to make a full HM type system work. (Also, just learn Elm.)
+
+The idea is to make coding as interactive as possible, to live in the runtime--but to make certain kinds of analysis possible that mean you don't have to take a code path to learn there are errors. And, then also, to be sure that you have excellent _runtime_ errors as well.

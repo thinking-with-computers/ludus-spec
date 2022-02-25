@@ -308,6 +308,31 @@ if condition
 ###### Truthy and falsy
 `if` evaluates `else_expr` if the value of `test_expr` is `nil` or `false`. Otherwise, it evaluates `then_expr`. (Do we want any other values to be falsy? E.g., `()`. Note that in any event, `0` and `""` are truthy, unlike in JS/PHP.)
 
+###### `if let` patterns: bindings, scopes, and missed matches
+The `test_expr` in an `if` expression creates a new scope that the result expressions inherit. In addition, any `let` bindings in a `test_expr`, if there is no match, do not panic, but instead evaluate to falsy.
+
+Thus:
+
+```
+if let nil = optional
+  then handle_nil ()
+  else {
+    something_with_something ()
+  }
+
+if let (:ok, result) = might_fail
+  then do_something ()
+  else handle_failure ()
+```
+
+Using a block as `test_expr` allows for multiple `let` expressions:
+
+```
+if { let foo = bar (); let baz = quux (foo) }
+  then do_something (foo, baz)
+  else handle_failure ()
+```
+
 ##### `cond`
 `cond` is a way of testing multiple conditions without nesting `if` expressions. It is the first example of a clause-based expression (`match` and function bodies are also clause-based.) Consider the example:
 
@@ -373,6 +398,7 @@ Best practice is to use `else` or `_` for default cases in both `cond` and `matc
     - _Descriptive placeholders?_ You can use a placeholder in multiple places in a pattern, but they all look equivalent. Do we want to allow `_foo` names, which aren't bound but _do_ offer the possibility of a descriptive name. _Temporary answer: yes descriptive placeholders._
 * _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Temporary answer: errors on definitely unreachable clauses._ That said, this is the stupid version of this: we don't do exhaustiveness checking, so you'll only get an error after a clause that always matches (e.g., `_` or `else`).
 * _`with`?_ The `with` here is actually not necessary. It gives the syntax some ventilation. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Temporary answer: none; keep working on our intuitions._ One possible solution that runs the consistency the other way: use `do` for expression blocks. But that's gonna feel cluttered... 
+* Allowing multiple patterns in the LHS of a match clause?, e.g. `0 | 1 -> ... & matches on 0 or 1`.
 
 #### Functions
 Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntaxes. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
@@ -595,9 +621,9 @@ Unstated here but completely anticipated is that a module/namespace/whatever is 
 That would give us a syntactical form something like:
 
 ```
-let inc <- add(1, x)
+let inc <- add(1, _)
 
-let dec <- sub(x, 1)
+let dec <- sub(_, 1)
 
 ns Foo {
   &&& a docstring could go here
@@ -713,8 +739,12 @@ Others that are possible are:
 
 #### Some nice-to-haves
 * Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions), or, approaching it from a different perspective, a `try`/`catch`-like construct, where match errors are swallowed. (But we want to avoid exceptions!).
-* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `myfn <- f | g | h` or `myfn <- h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. (But: consider transducers, which we'll use extensively.)
-* Generators & iterators (this could be syntactic sugar!, but will likely be optimized away), e.g.:
+* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `let myfn <- f | g | h` or `let myfn <- h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. But: consider transducers, which we'll use extensively. Transducers want function composition.
+  - F#, in addition to the pipeline operator, has forward and backward function composition: `f >> g >> h` and `h << g << f`, respectively. Since Ludus doesn't have `<` and `>` as comparison operators, it could simply use these, instead of the doubled ones.
+  - Consider the pipeline operator. F# and Elixir us `|>`.
+  - Ludus may want to have syntax sugar for binding its result type. Haskell uses `>>=`, but that's super obscure. I'm thinking `||>`. Alternately, we could use `>` as pipeline and `|>` as bind, using F#'s function composition operators.
+  - Effectively, we need to get this right, but also, this is (or can be) ultimately sugar for `let myfn <- comp ([h, g, f])`. So.
+* Generators & iterators (this could be syntactic sugar!, but will hopefully eventually be optimized), e.g.:
 ```
 counter_to_3 <- {
   var current <- 0
@@ -788,8 +818,9 @@ Generators may well be a later nice-to-have, but I suspect the protocol (dead si
 Following on the convention here of `(:value, x)`/`(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`)
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?--see above on the pipeline operators), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`) Anyway, you could also have `unwrap_or`, which takes a default value instead of panicking. But: the short-circuiting of monadic bind is deeply useful.
 * Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil` as well as an error result?
+* Stopping reduction is done by convention with a tuple: `(:stop, result)` stopes the reduction and returns the result.
 
 #### Special forms
 There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
@@ -814,3 +845,7 @@ Error handling is so, so very important to Ludus. I'm mostly cribbing from other
   * `handle <expr>`: The expression after `handle` may panic. If it doesn't, just return the value of the expression, `value`, in a result tuple: `(:ok, value)`. If it does, return `(:error, message)` (with `nil` as the message for a bare panic).
   * I suspect that `handle`ing panics will mostly be useful for things like writing a REPL, but should be avoided if not omitted from the language.
 * A deep thought, related to error handling and also name binding behavior: perhaps a REPL really is the wrong model. The notebook/script model may well be more interesting. Particularly to the extent that non-recoverable panics and statically bound names both really militate against the REPL, but work perfectly well with the notebook version. (And, since we're thinking transitional objects here: a notebook/file in an editor is something learners will be comfortable with, where an interactive REPL prompt is actually *not* something most will be comfortable with.)
+* A note regarding the above: `if let` also helps tame some error handling. The test expression in an `if` doesn't swallow all panics, only those that come from a `let` expression failing to match. This way, `match` expressions don't proliferate. Especially when you're trying to match on multiple values and stuffing them into a tuple feels unnatural, this lets you avoid nested `match` expressions.
+
+#### Testing
+From Rust and Zig, a good idea: put tests in the same file. `test {label} expr`. Doesn't run during execution (is totally ignored), but there'll be a test mode of some kind (`ludus test script.ld`). Tests won't be added to the AST during execution and so can go after an expression that's the return value of a script.
