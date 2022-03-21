@@ -151,76 +151,98 @@ Sets are unordered, unindexed collections of unique items (of any value). They a
 #### Operators (status: still in design)
 Ludus has very small set of operators: assignment (`=`), splat (`...`), pipeline (TBD), and match (`->`). The use of these is described below.
 
-#### Function application
+#### Function application (status: basic functionality done)
 Ludus has a great many built-in functions (especially since there are no basic operators for things like addition!). Functions can be variadic (take different numbers of arguments, with different behaviours based on those numbers). Functions are written by writing the name of the function as a word with the arguments following in a tuple literal: `foo (bar, baz)`. (Note that the space the function name and arguments tuple is idiomatic, but optional: `foo(bar, baz)` is valid Ludus.) To invoke a function with zero arguments, use the empty tuple: `quux ()`.
 
 A function name without a tuple following is treated as a reference to that function.
 
 An attempt to invoke a function (putting a tuple after an expression) with something that is not a function will raise an error. (Hopefully with a message that is more helpful than the traditional JavaScript headdesk of `undefined (read: nil) is not a function`.)
 
-##### Partial application
+##### Where functions may be called (status: explanation)
+Functions may only be called directly in a "synthetic" expression: an expressiont that starts with a word or a keyword. Arbitrary expressions may not be called. For example, the following is allowed:
+
+```
+let foo = fn () -> :foo
+foo ()
+```
+
+But the following is illegal:
+```
+{fn () -> :foo} () &=> Error: expected end of expression
+
+```
+
+
+##### Partial application (status: not started)
 Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder in a tuple applied to a function. As a consequence, all partially applied functions are unary.
 
-##### Pipeline application
-Ludus also allows for function pipelines. The last example above could be written `2 |> add (1, _) &=> 3`. Pipelines may be chained: `2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36`. The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions. (See below, re: a bind operator.)
+##### Pipeline application (status: in design)
+Ludus also allows for function pipelines. Function piplines are, for now, introduced by the keyword `do`. The pipeline operator is (for now) `|>`:
 
-#### Patterns and assignment
+```
+do 2 |> add (1, _) &=> 3
+
+do 2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36
+
+do fn (_) -> :foo |> nil &=> :foo
+```
+
+The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions. (See below, re: a bind operator.)
+
+#### Patterns and assignment (status: in progress, basic functionality complete)
 Ludus uses pattern matching from the ground up: all assignments are actually patterns. Patterns, generally, do two things: they match (against a value), and they bind names (in a scope).
 
-##### Basic matching & assignment
-The most basic pattern match is assignment, which uses the keyword `let` and the assignment operator, or left-pointing arrow: `<-`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `let true <- true`, `let 42 <- 42`, `let "foo" <- "foo"`, `let [1, 2, 3] <- [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below).
+##### Basic matching & assignment (status: done)
+The most basic pattern match is assignment, which is introduced by the keyword `let` and uses the assignment operator: `=`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `let true <- true`, `let 42 <- 42`, `let "foo" <- "foo"`, `let [1, 2, 3] <- [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below). (NB: List patterns are not yet complete.)
 
-###### New design decision: `let`
+###### New design decision: `let` (status: solid)
 I had an idea like it might be possible and desirable to do without `let` (as Elixir does), but I can tell as I embark on the parser that parsing will be made much easier if we include `let` as a keyword that preceds assignment. (That way, the parser doesn't have to do nearly indefinite lookahead to determine whether you're dealing with a collection literal or a collection pattern.)
 
 That said, it actually improves code readability to have all assignments set off by `let`s. So.
 
-##### Words
-To bind a name, the left hand side of an assignment can be a word: `let foo <- true`. The name `foo` is now bound to the value `true`, and anywhere `foo` is used, it will evaluate to `true`. (Note that names may not be re-bound in the same scope; see below.) Words always match against any value. So `let names <- ${"Pat", "Chris", "Gabe"}` matches, and binds `names` to the set with names in them (so that `contains? ("Pat", names) &=> true`).
+##### Words (status: done)
+To bind a name, the left hand side of an assignment can be a word: `let foo = true`. The name `foo` is now bound to the value `true`, and anywhere `foo` is used, it will evaluate to `true`. (Note that names may not be re-bound in the same scope; see below.) Words always match against any value. So `let names = ${"Pat", "Chris", "Gabe"}` matches, and binds `names` to the set with names in them (so that `contains? ("Pat", names) &=> true`).
 
-##### Placeholder
-The placeholder also always matches, but does not bind a name: `let _ <- :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
+##### Placeholder (status: done)
+The placeholder also always matches, but does not bind a name: `let _ = :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
 
 ##### Collections
 Ludus also allows you to match against collection literals. This is extremely useful and powerful. They are fairly intuitive. Patterns may be nested.
 
-###### Tuples
-Tuples will match if the left and right hand sides are the same length, and that the values at each position match. `let (x, y) <- (1, 2)` matches, and binds `x` to `1` and `y` to `2`. `let (_, y) <- (1, 2)` matches, ignores the first member of the right-hand tuple, and binds `y` to `2`. `let (x, y, z) <- (1, 2)` will not match and raise an error. 
+###### Tuples (status: done)
+Tuples will match if the left and right hand sides are the same length, and that the values at each position match. `let (x, y) = (1, 2)` matches, and binds `x` to `1` and `y` to `2`. `let (_, y) = (1, 2)` matches, ignores the first member of the right-hand tuple, and binds `y` to `2`. `let (x, y, z) = (1, 2)` will not match and raise an error. 
 
-Tuple literals also match against themselves: `let (1, 2) <- (1, 2)` matches and binds no names.
+Tuple literals also match against themselves: `let (1, 2) = (1, 2)` matches and binds no names.
 
-The empty tuple matches against the empty tuple: `let () <- ()`.
+The empty tuple matches against the empty tuple: `let () = ()`.
 
-###### Unresolved design decision: tuple splats
-**This appears as resolved throuhgout, but it, in fact, not.**
+###### Lists (status: not yet done)
+Lists match in similar ways to tuples. The difference is that they allow matching with a splat, which matches any remaining members that aren't explicitly in the pattern:
 
-_The original text here:_ There is one exception to the length-match requirement: a tuple pattern may also have a "rest pattern" (or splat), which matches any remaining members in the tuple, e.g.: `let (x, y, ...more) <- (1, 2, 3, 4)` binds `x` to `1`, `y` to `2`, and `more` to `(3, 4)`. Meanwhile, `let (1, _, ...more) <- (1, 2)` matches, and binds `more` to `()` (the empty tuple).
+```
+let [] = []
+let [x] = [1] & x is 1
+let [head, ...tail] = [1, 2, 3, 4] & head is 1, tail is [2, 3, 4]
+```
 
-_Deep thoughts:_ Tuples have to be *fast* (for fast function application and pattern matching), and one way to help make them fast is to ensure that they have lengths that are statically known at compile time. Clojure (as a Lisp) has a deep structural homology between lists and arguments. But Elixir, whose pattern matching I'm cribbing from, does not: functions have their arity in their name, e.g. `add/0`, `add/1` and `add/2` are not different arities of the same function, but different functions.
+###### Hashmaps (status: not yet done)
+Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the right bind to words on the left. So: `let #{foo} = #{:foo 42}` matches, and binds `foo` to `42`.Hashmap patterns can also include rest patterns, which will bind any key/value pairs that aren't explicitly invoked on the left hand side: `let #{foo, ...rest} = #{:foo 42, :bar 23, :baz 3.14}` binds `rest` to `#{:bar 23, :baz 3.14}`. Placeholders may be used as the value in a key/value pair to match any value held at a key (i.e. if they key is defined on the hashmap).
 
-Ludus should have "variadic" functions, where `add () &=> 0`, `add (1) &=> 1`, and `add (1, 2) &=> 3`. But if tuples must have a statically known length (and function application must use a tuple literal!), then we can compile different arities to different functions under the hood: and that makes things much faster.
-
-###### Lists
-Lists match identically to tuples, but with square brackets, including splats.
-
-###### Hashmaps
-Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the right bind to words on the left. So: `#{foo} <- #{:foo 42}` matches, and binds `foo` to `42`.Hashmap patterns can also include rest patterns, which will bind any key/value pairs that aren't explicitly invoked on the left hand side: `#{foo, ...rest} <- #{:foo 42, :bar 23, :baz 3.14}` binds `rest` to `#{:bar 23, :baz 3.14}`. Keywords and values on the left hand side match for equality but do not bind names, `#{:bar 23, foo} <- #{:foo 42, :bar 23}` matches and binds `foo` to `42`, and does not bind `bar` to anything. Placeholders may be used as the value in a key/value pair to match any value held at a key (i.e. if they key is defined on the hashmap).
-
-#### Splats
+#### Splats in expressions (status: not yet done)
 **See above for a discussion of tuple splats.**
 
 We've already seen the "rest" pattern. A similar technique can be used to insert all values from a collection into another collection. Consider:
 
 ```
-let numbers <- [1, 2, 3]
-let new_numbers <- [0, ...numbers]
+let numbers = [1, 2, 3]
+let new_numbers = [0, ...numbers]
 & new_numbers is [0, 1, 2, 3]
 
-let users <- #{
+let users = #{
   :Pat "pat@gmail.com"
   :Chris "chris@yahoo.com"
 }
-let new_users <- #{:Ashley "ashley@outlook.com", ...users}
+let new_users = #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 
 & however, this creates a new hashmap, more idiomatic (and faster) would be:
@@ -230,9 +252,9 @@ let new_users_update <- update (users, :Ashley, "ashley@outlook.com")
 users &=> #{:Pat "pat@gmail.com", :Chris "chris@yahoo.com"}
 ```
 
-Splats work for all Ludus collections. Splats may only be used within collection types: tuples may be splatted only into tuples (eds: _probably not!_); lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-type-casts tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
+Splats work for persistent (variable-size) Ludus collections. Splats may only be used within collection types: sets may be splatted only into sets; lists may be splatted only into lists; etc. (This is for a number of reasons; the semantics of different collection types are different enough that splats-as-type-casts tempt the elder gods.) Conversions between collection types are handled by functions, and not all conversions are possible.
 
-#### Expressions, blocks, scope, and scripts
+#### Expressions, blocks, scope, and scripts (status: done)
 Ludus is, exclusively, an expression-based language: everything returns a value. (Even assignment!; more on this below.) Expressions are separated by newlines or by semicolons.
 
 ```
@@ -249,7 +271,7 @@ Each line is evaluated on its own, and returns the value to which it evaluates. 
 A block is a group of expressions that are evaluated in order, together, which returns the value of the last expression. Blocks are wrapped in curly braces: `{1; 2; 3} &=> 3`. A block is treated as a single expression by code outside it. So, you could write:
 
 ```
-let foo <- {
+let foo = {
   "I"
   "am"
   :a
@@ -264,36 +286,37 @@ let foo <- {
 Each block also introduces its own (lexical) scope. So any bindings introduced in a block are freed once the block is closed. Consider:
 
 ```
-let my_uncool_number <- 4
-let my_cool_number <- {
-  let sum <- add (2, my_uncool_number) &=>6; has access to the encolsing scope
-  let product <- mult (sum, 2)
-  let third <- div (product, 3)
+let my_uncool_number = 4
+let my_cool_number = {
+  let sum = add (2, my_uncool_number) &=>6; has access to the encolsing scope
+  let product = mult (sum, 2)
+  let third = div (product, 3)
   third
 } &=> 4
 my_cool_number &=> 4
 sum &=> error! unbound name
 ```
 
-`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `let my_cool_number <- my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
+`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `let my_cool_number = do my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
 
 Each block has access to any enclosing scope(s), up to the script level, and then to the prelude.
 
-##### Scripts
+##### Scripts (status: done)
 Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `let foo <- import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
 
 ###### Unresolved design decisions: assignments and bindings
-* _What do assignments return?_ One version is that, if there's a match, they simply return the right-hand side. The other version is that they return a special `Nothing` value that never matches against anything in any pattern, ever (and thus will throw an error if one puts a binding as the last line in a block). I'm inclined to say the former, but had originally considered the latter. _Temporary answer: return RHS._
-* _Can bindings be shadowed?_ Can a name be bound in an enclosing scope, and then bound in an included scope? Clearly, the interior binding would not affect the binding in its enclosing scope. I am very ambivalent about this. _Temporary answer: yes, shadowing_.
+* _What do assignments return?_ One version is that, if there's a match, they simply return the right-hand side. The other version is that they return a special `Nothing` value that never matches against anything in any pattern, ever (and thus will throw an error if one puts a binding as the last line in a block). I'm inclined to say the former, but had originally considered the latter. _Answer: return RHS. Confidence: high._
+* _Can bindings be shadowed?_ Can a name be bound in an enclosing scope, and then bound in an included scope? Clearly, the interior binding would not affect the binding in its enclosing scope. I am very ambivalent about this. _Answer: yes, shadowing. Confidence: high._
 * _REPL vs. script._ The REPL will be largely useless if you cannot re-bind a name in a session. But: that then means that scripts and REPLs have different rules, and you can't copy between them. This is rather a conundrum. So, a few possibilities:
   - Just embrace the different rules. This is what OCaml does.
   - Allow name-rebinding, to make scripts follow REPL rules. I don't like this, as it brings mutation into the picture unmanaged. And part of the Ludus way is to embrace as much strictness and explicitness as you can get in a dynamic language.
   - Use a different model of interactivity: no Ludus REPL. We have a version of this: the notebook. This, right now, is my preferred suggestion. (You could use something like Quokka [for JS] or ClojureSublimed in a code editor.) That said, a notebook is *substantially* more complex as a piece of software (even with plugins for a code editor) than a REPL.
+  - Current answer: For now, Ludus is just a script, not a REPL. Punt on this design decision.
 
 #### Conditional forms
 Ludus has three main control flow constructs, called "conditional forms": `if`, `cond`, and `match`. All three are expressions, not statements.
 
-##### `if`
+##### `if` (status: done)
 `if` comes with two additional reserved words, `then` and `else`. `if` is binary: it decides which expression to evaluate based on a condition expression. Note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
 
 Newlines may come after the various expressions, e.g.:
@@ -309,10 +332,10 @@ if condition
 
 (Indentations are not significant in Ludus, but are considered good practice for code readability.)
 
-###### Truthy and falsy
+###### Truthy and falsy (status: done)
 `if` evaluates `else_expr` if the value of `test_expr` is `nil` or `false`. Otherwise, it evaluates `then_expr`. (Do we want any other values to be falsy? E.g., `()`. Note that in any event, `0` and `""` are truthy, unlike in JS/PHP.)
 
-###### `if let` patterns: bindings, scopes, and missed matches
+###### `if let` patterns: bindings, scopes, and missed matches (status: not yet done)
 The `test_expr` in an `if` expression creates a new scope that the result expressions inherit. In addition, any `let` bindings in a `test_expr`, if there is no match, do not panic, but instead evaluate to falsy.
 
 Thus:
@@ -337,7 +360,7 @@ if { let foo = bar (); let baz = quux (foo) }
   else handle_failure ()
 ```
 
-##### `cond`
+##### `cond` (status: not yet done)
 `cond` is a way of testing multiple conditions without nesting `if` expressions. It is the first example of a clause-based expression (`match` and function bodies are also clause-based.) Consider the example:
 
 ```
@@ -358,7 +381,7 @@ As with all expressions, you may use a block in either side of a clause (althoug
 
 `cond` is useful when the conditions involve multiple values, or testing across various domains. But it is rather less useful than `match`, which is the real conditional workhorse of Ludus.
 
-##### `match`
+##### `match` (status: done; but the still-limited patterns affect this)
 `match` is much the same as `cond`, but uses pattern matching (as assignment, above) to determine which clause to evalute. This collection of pattern matching clauses is called a "`with` block," which comes after `match` and other constructs with identical semantics: `loop`, named functions, etc. Consider the example:
 
 ```
@@ -392,22 +415,22 @@ match do_something () with {
 
 The formal description here is fairly straightforward: `match <value_expr> with { <clauses> }`. As with `cond`, there must be one or more clauses, which are written `<pattern> -> <result_expr>`. If the pattern matches, the `result_expr` is evaluated--with any names in the pattern bound during evaluation (as in the tuple example clauses above). As with assignment matching, patterns can match against tuples, lists, and hashmaps.
 
-As with `cond`, if no clause matches, an error is raised. Also, as with `cond`, there are multiple ways of writing the default case, to wit: idiomatically, the placeholder (`_`) will match and not bind a name. You may also use the reserved word `else`.
+As with `cond`, if no clause matches, an error is raised. Also, as with `cond`, there are multiple ways of writing the default case, to wit: idiomatically, the placeholder (`_`) will match and not bind a name. You may also use the reserved word `else`. 
 
-###### Use `else` and `_`
+###### Use `else` and `_` (Status: this use of `else` is not yet supported.)
 Best practice is to use `else` or `_` for default cases in both `cond` and `match`, since they behave similarly in all conditional forms. If you use a literal truthy value to form your default clause in `cond`, that is substantially different behaviour than using a literal value in `match` (which will only match on equality).
 
 ###### Unresolved design decisions
-* _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: warnings (maybe) on unused bound names._
-    - _Descriptive placeholders?_ You can use a placeholder in multiple places in a pattern, but they all look equivalent. Do we want to allow `_foo` names, which aren't bound but _do_ offer the possibility of a descriptive name. _Temporary answer: yes descriptive placeholders._
-* _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Temporary answer: errors on definitely unreachable clauses._ That said, this is the stupid version of this: we don't do exhaustiveness checking, so you'll only get an error after a clause that always matches (e.g., `_` or `else`).
-* _`with`?_ The `with` here is actually not necessary. It gives the syntax some ventilation. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Temporary answer: none; keep working on our intuitions._ One possible solution that runs the consistency the other way: use `do` for expression blocks. But that's gonna feel cluttered... 
-* Allowing multiple patterns in the LHS of a match clause?, e.g. `0 | 1 -> ... & matches on 0 or 1`.
+* _Unused bound names?_ Do we want to raise an error for unused bound names in the right-hand expression of a `match` clause? A name will always match, and so swallow any clauses below it. Probably binding a name without using it is unintended. _Temporary answer: ???._
+    - _Descriptive placeholders?_ You can use a placeholder in multiple places in a pattern, but they all look equivalent. Do we want to allow `_foo` names, which aren't bound but _do_ offer the possibility of a descriptive name. _Answer: yes descriptive placeholders. Status: not yet done._
+* _Unreachable clauses?_ Do we want to raise an error for unreachable clauses, as the last clause above? Again, probably it's unintentional to write unreachable code. _Answer: it's complicated. See the document nses, structs, and types._
+* _`with`?_ The `with` here is actually not necessary. It gives the syntax some ventilation. But in particular, the idea is that we'd like to distinguish between a normal expression block and a set of pattern-matching clauses. So putting `with` before a block could in principle always mean it's pattern-matching. That means we'd want, for consistency's sake, to have `with` in function definitions with multiple clauses, as well as `loop` and `gen` forms. `cond` is... its own thing. I reckon consistency isn't actually in reach. _Answer: in fact, it is necessary, for parsing (to separate the expression and the clause in a simple match expression)._
+* Allowing multiple patterns in the LHS of a match clause?, e.g. `0 | 1 -> ... & matches on 0 or 1`. _Temporary answer: this is desirable, I think, but for a later iteration._
 
 #### Functions
 Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntaxes. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
 
-##### Anonymous functions
+##### Anonymous functions (status: done)
 Anonymous functions are the syntactically simplest form, and can be used inline as arguments to higher-order functions. They consist of the reserved word, `fn`, and then a function clause. A stub and examples:
 
 ```
@@ -420,9 +443,11 @@ fn (x, y, z) -> {
 }
 ```
 
-Anonymous functions can be bound to names using a normal assignment operator: `inc <- fn (x) -> add (x, 1)`. That said, in this example, `inc` is still an anonymous function: it has no name. (For example, simply being rendered at the REPL as: `fn<anon.>`.)
+Anonymous functions can be bound to names using a normal assignment operator: `let inc = fn (x) -> add (x, 1)`. That said, in this example, `inc` is still an anonymous function: it has no name.
 
-##### Named functions
+Anonymous functions may have only one clause.
+
+##### Named functions (status: done)
 You can create a named function by putting its name as a word after `fn` and before the clause:
 
 ```
@@ -434,7 +459,7 @@ Named functions bind the name to the function, and also attach that name as meta
 
 Named functions also bind their name inside the body of the function clause, so they can be called recursively. (More on recursion below.)
 
-##### Variadic and documented functions
+##### Variadic and documented functions (status: variadic functions are done; documented functions are not)
 Functions can also contain multiple clauses, identically to a `match` expression. At the top of the clause block, you may also include docstring comments, which will be used in generated documentation.
 
 Also, in all function clauses, patterns must have a left-hand side that is a tuple pattern. Anything else will raise a syntax error.
@@ -487,7 +512,7 @@ fn add {
   (x, y) -> {...native code...}
   & NB: this example may be obsolete (see notes on tuple splats)
   (x, y, ...more) -> {
-    let sum <- add (x, y)
+    let sum = add (x, y)
     add (sum, ...more)
   }
 }
@@ -501,10 +526,10 @@ fn add {
 
 `add` is a recursive variadic function: it behaves differently depending on how many arguments you give it. With 0 arguments, you get the addition identity: `0`. With 1, you get back the number unchanged. With 2, you add two numbers together in native code. And with three or more, you get a recursive call that sums all the arguments together. (This is not especially efficient, but it's nicely illustrative.)
 
-###### Clauses and documentation
+###### Clauses and documentation (status: not yet done)
 The left-hand side of all function clauses is given in generated documentation. Using good, descriptive names for arguments is a useful practice for future-you, but also for users of your code.
 
-##### Recursion
+##### Recursion (status: recursion works)
 Following Logo and Scheme's lead, to get looping behaviour, we use recursion. Ludus is optimized such that recursion is fast (lol, that's WIP like whoa). 
 
 Consider a function that calculates the sum of a list of numbers:
@@ -520,7 +545,7 @@ fn sum {
 
 Note that pattern matching (in `sum`, and in the `add` example above) makes for a concise and declarative way to handle base cases.
 
-###### Tail-call optimization
+###### Tail-call optimization (status: not yet done)
 To be fast (optimized!), recursion must be managed in a particular way: no recursive call should be made except in tail position: in the last line of the function body, as the lefthand-most call. None of the recursive calls we have yet seen is in tail position. `sum` can be more efficiently written as:
 
 ```
@@ -529,7 +554,7 @@ fn sum {
   ([]) -> 0
   ([x]) -> sum (x, 0)
   ([first, ...rest], n) -> {
-    let running_total <- add (first, n) & broken out for pedagogical purposes
+    let running_total = add (first, n) & broken out for pedagogical purposes
     sum (rest, running_total) & sum appears only as leftmost call on last line
   }
 }
@@ -543,7 +568,7 @@ That said, Ludus makes extensive use of higher-order functions to work on collec
 fn map {
   &&& Takes a list and a unary function, and returns a list whose elements are the result of applying the function to the members of the original list.
   &&& e.g. `map (add (1, _), [0, 1, 2]) &=> [1, 2, 3]`
-  (f, source) -> map (f, source, []) & tail-recursive call
+  (f, source) -> map (f, source, []) & tail-recursive call, but not optimized--note different arities
   (f, [], result) -> result
   (f, [head, ...tail], result) -> map (f, tail, conj (result, f (tail)))
 }
@@ -563,29 +588,29 @@ fn map {
   }
 }
 ```
-It has a lovely 1-to-1 correspondence with `match`, and also closely resembles functions. Also, it avoids both creating a function (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Temporary decision: yes `loop` and `repeat`. Maybe `recur` as a reserved word in functions, but for now `recur` can only belong in a `loop`._
+It has a lovely 1-to-1 correspondence with `match`, and also closely resembles functions. Also, it avoids both creating a function (does it?, or is this just sugar for an anonymous function?) and polluting the function signature with helper arguments. _Answer: yes `loop` and `repeat`. `recur` is a reserved word that can only belong in a `loop`._
 
-Consider also a simplified syntax, on the model of an anonymous function: `loop (<args>) (<params>) -> <expr>`. This involves awkward back-to-back tuples; maybe not.
+Simplified loops may be written like `match` expressions: `loop (foo) with (bar) -> baz`.
 
-* _Early return._ Do we want a `return` reserved word that will allow for early returns from functions? I believe the `cond` and `match` forms, along with multiple function clauses, actually gets you whatever behaviour you want. But Rust has a `return`, and that may well be helpful for some imperative code. _Temporary decision: for now, no early return._
+* _Early return._ Do we want a `return` reserved word that will allow for early returns from functions? I believe the `cond` and `match` forms, along with multiple function clauses, actually gets you whatever behaviour you want. But Rust has a `return`, and that may well be helpful for some imperative-style code. _Temporary decision: for now, no early return._
 
-#### Variables and mutations
+#### Variables and mutations (status: still in design--see memory.md)
 So far, everything described here is completely stateless: all literals are immutable, and names cannot even be re-bound. Eventually, something has to change its state. Enter variables and mutations. A variable is name that is bound to something mutable, using the `var` reserved word. Mutations allow that name to have its value changed, using the `mut` reserved word.
 
 ```
-var a_number <- 12
+var a_number = 12
 & a_number is 12
 
-mut a_number <- inc (a_number)
+mut a_number = inc (a_number)
 & a_number is now 13
 ```
 
 References can only be re-bound after the `mut` reserved word. Also, once a reference passes out of scope, it is no longer mutable. So for example:
 
 ```
-count_up <- {
+let count_up = {
   var a_counter <- 0
-  fn increment_counter () -> mut a_counter <- inc (a_counter)
+  fn increment_counter () -> mut a_counter = inc (a_counter)
 }
 
 count_up () &=> 1
@@ -593,29 +618,31 @@ count_up () &=> 2
 count_up () &=> 3
 
 & but nota bene
-cant_count <- {
-  var another_counter <- 0
+let cant_count = {
+  var another_counter = 0
   another_counter
 }
 
 cant_count &=> 0
-mut cant_count <- inc (cant_count) &=> error!
+mut cant_count = inc (cant_count) &=> error!
 ```
+
+Note: the `count_up` example here may well be illegal: to avoid reference cycles and to get on with a reference-counting system, mutable variables may only be mutated in the scope in which they are defined, not in child scopes. This may render them fully obsolete in the language. Closures allow for reference cycles. The alternative I've imagined is a ref/swap/deref system where refs may not hold functions or other refs.
 
 ##### `var`s must be simple names
 The left hand side of a `var` match must be a simple name, not a destructuring pattern match.
 
-#### Closures
+#### Closures (status: in design, see memory.md)
 Note that in the `count_up` example, `increment_counter` is able to access `a_counter`, which is _not_ accessible outside that block. `increment_counter` _closes over_ its lexical scope, and can continue to access it. (It can also close over things all the way up to the script level. Nothing in the prelude is mutable, so it doesn't matter.) This allows for the very careful and explicit management of mutable state.
 
-#### Keywords and accessing hashmaps
+#### Keywords and accessing hashmaps (status: mostly done)
 How do you get values out of hashmaps? The keys are keywords. There are two syntactical options, _functional keywords_ and _keyword accessors_:
-* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member.
-* Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`.
+* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords at the root of synthetic expressions are done; keywords as higher-order functions are not, nor are pipelines.)
+* Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`. (Status: done.)
 
 In each case, accessing a key that is not defined in a hashmap returns `nil`. There will be function equivalents to key access which will raise errors with undefined key access. The equivalents to the previous examples: `get(bar, :foo)` gets `:foo` on `bar`; or `get(foo, [:bar, :baz])` gets `foo:bar:baz`.
 
-Hashmaps are used extensively to create packages of functions.
+Hashmaps are used extensively to create packages of functions. (NB: Probably not: these will be namespaces, which are actually structs; see nses_structs_types.md.)
 
 Property access on any value that is not a hashmap returns `nil`.
 
@@ -638,38 +665,19 @@ ns Foo {
 One additional nicety, here. Namespaces will be statically known at compile-time: they may only have bound names as their members. What's the one-line delimiter: , or ;?
 
 #### Types and patterns
-**This section is very tenative.**
-
-Ludus has a strictly limited number of types, which correspond to the literal values and collections:
-* `nil`
-* Boolean
-* Keyword
-* String
-* Number
-* Tuple
-* List
-* Hashmap
-* Set
-* Function
-* Namespace
-* Generator/iterator/sequence?
-
-There are no user-defined types. (Really?) None of these types are parametric. So a list is a list is a list.
-
-##### Getting types
-There is a core function, `type_of` that returns the type of any Ludus value. The information is returned as a simple keyword: `:nil`, `:boolean`, `:keyword`, `:string`, and so on. So, `type_of (4) &=> :number`, `type_of (nil) &=> :nil`, etc.
+**Status: early design days. See nses_structs_types.md.**
 
 ##### Using types in patterns
 Patterns can match on type, using the `as` reserved word. After any pattern, simply use `as :type`. For example:
 
 ```
-fn inc (x as :number) -> add(1, x)
+fn inc (x as Number) -> add(1, x)
 inc (4) &=> 5
 inc ("foo") &=> error!
 
 fn add_strings_or_numbers {
-  (x as :number, y as :number) -> add (x, y)
-  (x as :string, y as :string) -> concat (x, y)
+  (x as Number, y as Number) -> add (x, y)
+  (x as String, y as String) -> concat (x, y)
 }
 add_strings_or_numbers (4, 5) &=> 9
 add_strings_or_numbers ("foo", "bar") &=> "foobar"
@@ -678,49 +686,36 @@ add_strings_or_numbers ("foo", 4) &=> error!
 
 This is a simple but quite robust form of type-checking that allows for polymorphic behaviours. It is somewhat verbose, but that discourages overly-ambitious typechecking. The prelude/standard library will be typechecked in this way.
 
-###### Unresolved design decision: alternative for as: `::`
-In place of `as :number`, we could also (instead?) use a shorthand cribbed from Haskell-world, `::`, which is prounced "has type of." So, `(x::number)` or `(x ::number)`, instead of `(x as :number)`. It's more concise, but therefore also possibly more inscrutable. To consider.
+##### Guards in patterns (status: in design)
+Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Answer: add this, but in a later iteration._ 
 
-##### Unresolved design decision: named patterns
-This one is... interesting. I haven't quite seen it elsewhere (maybe in one of Bob Nystrom's languages?); I believe it's semanticaly very iteresting but may have terrible performance characteristics (especially to the extent that it encourages deeply-nested patterns). But you could use named patterns to describe the shapes of various collections. Perhaps something like `pattern NumberOk <- (:ok, value as :number)`, and then use `NumberOk` as the name for a positive result tuple that can only hold a number, which would come after `as` in a pattern. These would not bind names (although they can have names in their description), but would match or not. This could function like a sort of ad-hoc user-facing type system. _Temporary decision: wait and see; don't add this yet._
-
-One possible restriction to avoid deeply-nested patterns is to avoid named patterns at all! No named patterns in the definition of named patterns.
-
-##### Unresolved design decision: guards in patterns
-Elixir has a `when` reserved word that allows for refinement in the left-hand side of a pattern. For example, `(x) when is_odd (x) -> {...do something...}` will only match when `x` is odd (when the guard expression evaluates to truthy). (Note that the names have to be bound in the guard expression.) _Temporary decision: wait and see; don't add this yet._ 
-
-On Elixir's guards: https://hexdocs.pm/elixir/patterns-and-guards.html#guards
-
-###### Thought: finer-grained "types"
-Putting these two together, you could write, for example, `pattern OddNumber <- x as :number when is_odd (x)`. These could get you sophisticated runtime type checking as pattern matching guards. But: this could also go off the rails really quickly and devolve into titchy pattern munging. _Temporary decision: determined by the two previous decisions. (Although: you could disallow `when` in named patterns.)_ But also: see the next unresolved design decision: guards and named patterns are a robust _predicate_ DSL, where you can tell if a value conforms to a shape that you've named. But it's _not_ a type system, in the sense that you can't climb back up from the value to some more general category.
+On Elixir's guards: https://hexdocs.pm/elixir/patterns-and-guards.html#guards. Note that Elixir's strategy ensures that guards never have side effects.
 
 #### Unresolved design decision: polymorphism
-I don't believe this is deeply urgent, since if we get some well-designed abstractions (which I think these are!; I am standing on the shoulders of Rich Hickey), polymorphism isn't actually much of a problem. There aren't user-defined types, so there is no need to require user-facing extensions. But we can use the same basic foundation for polymorphism I used in the original JavaScript-hosted Ludus, which allows for user-defined types that can be associated with namespaces to produce module. Again, I want to see how far we can get without module-based (or other) polymorphism. Convention (e.g., result tuples) over polymorphism, to abuse the Rails mantra.
-
-To which I add: this is actually pretty close to the Logo/Scheme type system, where user-defined types just aren't a thing. This cuts against the forms of polymorphism in modern languages (including Elixir and Clojure). They each have useful polymorphic models we can easily integrate into Ludus without too much retrofitting.
+**Status: see nses_structs_types.md.**
  
-#### Equality
+#### Equality (status: done, `eq` is already in the prelude.)
 All equality in Ludus is value-equality--with one exception. Functions are reference-equal (testing for function equality is probably... not a thing you should be doing very often). All atomic and collection values are compared based on value using the `eq` function. So, e.g., `eq (${1, 2, 3}, ${3, 2, 1}, ${2, 3, 1}) &=> true`.
 
 #### Events and asynchronicity
-**This section needs much more research.**
+**Status: This section needs much more research.**
 
 Asynchronicity is hard no matter how you do it. But the single-threaded JavaScript event loop is likely a good model. (Also, look to inspiration from Pyret.) I believe it's easy enough to implement with a single reserved word, `defer <expr>`, which bumps a computation to the next tick, and perhaps `wait <time> <expr>`.
 
-#### Errors
-**This section is very tentative.** And involves lots of thinking-through. 
- 
-As a learner-oriented language, Ludus must have excellent and informative error messages. One lesson from static languages is that it's best to get errors as early as possible in the process, bringing as many runtime errors forward as possible to earlier stages in compilation/interpretation.
+#### Errors (status: in progress)
+**This section is uneven.** 
 
-In addition, it's worth holding onto a basic distinction between errors in business logic and errors in code. Calling a function with the wrong number or type of arguments is not an error a system tolerates; whereas division by zero or not getting the right input from a user should not bring down a system. Result tuples are our friends for the latter (in the absence of parametric static types, e.g. `Result<T, E>`). The former should, in fact, halt the world.
+As a learner-oriented language, Ludus must have excellent and informative error messages. One lesson from static languages is that it's best to get errors as early as possible in the process, bringing as many runtime errors forward as possible to earlier stages in compilation/interpretation. (Status: writing a good parser is hard, but I'm trying.)
+
+In addition, it's worth holding onto a basic distinction between errors in business logic and errors in code. Calling a function with the wrong number or type of arguments is not an error a system tolerates; whereas division by zero or not getting the right input from a user should not bring down a system. A result type is our friend for the latter (either result tuples or a dedicated type). The former should, in fact, halt the world.
 
 Pattern matching will driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
 
-The thought for now: there should be no user-facing error system other than returning error tuples, and maybe `panic!`. Let's see how far we can get before we need to `raise` anything (although obviously that will be a reserved word).
+The thought for now: there should be no user-facing error system other than returning error types/tuples, and `panic!`. Let's see how far we can get before we need something more sophisticated. (Status: `panic!` exists and does indeed halt the world; yet to add: any information at all along with a panic.)
 
 This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust/Go: you have results and panics, and that's more or less it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there).
 
-#### Static analysis
+#### Static analysis (status: a nice fantasy)
 Following from commitments to good & early errors, Ludus should do aggressive static analysis to discover errors early. We do it when we can, for the most common use cases. It will be possible to frustrate static analysis by doing things in obscurantist ways, but if you stay on the static-analysis happy path, you'll get something pretty robust. So, for example, I think we can get (for things that might normally be dynamic):
 * Function arity checking.
 * Namespace member access.
@@ -729,33 +724,33 @@ Following from commitments to good & early errors, Ludus should do aggressive st
 * Attempted mutation of non-`var` bindings.
 * Re-binding a bound name.
 
-#### Reserved words
+#### Reserved words (status: done-ish)
 In this document so far, here is the complete list of Ludus reserved words.
 
 Here are the reserved words that will definitely be in the language:
-`as`, `cond`, `else`, `false`, `fn`, `if`, `match`, `mut`, `nil`, `panic!` or (`panic`), `then`, `true`, `var`, `with`.
+`as`, `cond`, `else`, `false`, `fn`, `if`, `match`, `mut`, `nil`, `then`, `true`, `var`, `with`, `loop`, `ns`, `recur`, `repeat`, `when`, `yield`.
 
-Here are those that are tentative or possibly proposed in this document:
-`defer`, `loop`, `ns`, `pattern`, `raise`, `recur`, `repeat`, `return`, `when`.
+Here are those that are tentative or possibly proposed in this document or related documents: 
+`defer`, `data`, `module`, `import`.
 
 Others that are possible are:
-`assert`, `async`, `await`, `catch`, `enum`, `finally`, `mod`, `module`, `try`, `type`, `wait`.
+`assert`, `async`, `await`, `catch`, `enum`, `finally`, `mod`, `try`, `type`, `wait`, `pattern`, `raise`, `return`.
 
 #### Some nice-to-haves
-* Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions), or, approaching it from a different perspective, a `try`/`catch`-like construct, where match errors are swallowed. (But we want to avoid exceptions!).
-* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> x |> f |> g |> h` is better than `let myfn <- f | g | h` or `let myfn <- h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. But: consider transducers, which we'll use extensively. Transducers want function composition.
+* Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions). (Status: superseded by a proposed `if`/`let`) pattern, in which any names bound in the test expression of an `if` are available in the `then` expression, and any errors dump you to the `else` expression (with no names bound).
+* Should there be a function composition/pipeing operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> do x |> f |> g |> h` is better than `let myfn = f | g | h` or `let myfn = h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. But: consider transducers, which we'll use extensively. Transducers want function composition.
   - F#, in addition to the pipeline operator, has forward and backward function composition: `f >> g >> h` and `h << g << f`, respectively. Since Ludus doesn't have `<` and `>` as comparison operators, it could simply use these, instead of the doubled ones.
   - Consider the pipeline operator. F# and Elixir us `|>`.
   - Ludus may want to have syntax sugar for binding its result type. Haskell uses `>>=`, but that's super obscure. I'm thinking `||>`. Alternately, we could use `>` as pipeline and `|>` as bind, using F#'s function composition operators.
-  - Effectively, we need to get this right, but also, this is (or can be) ultimately sugar for `let myfn <- comp ([h, g, f])`. So.
-* Generators & iterators (this could be syntactic sugar!, but will hopefully eventually be optimized), e.g.:
+  - Effectively, we need to get this right, but also, this is (or can be) ultimately sugar for `let myfn = comp ([h, g, f])`. So.
+* Generators & iterators (this could be syntactic sugar!, but will hopefully eventually be optimized), e.g. [not actually legal with new scoping rules]:
 ```
-counter_to_3 <- {
-  var current <- 0
+let counter_to_3 = {
+  var current = 0
 
   fn next () -> {
-    let out <- current
-    mut current <- inc (current)
+    let out = current
+    mut current = inc (current)
     if gt (current, 3)
       then (:done, nil)
       else (:value, out)
@@ -776,11 +771,11 @@ counter_to_3:next () &=> (:done, nil)
 This could be rewritten as:
 
 ```
-let conter_to_3 <- gen (0) with { 
+let conter_to_3 = gen (0) with { 
   (current) -> {
     yield current
     if gt (current, 3)
-      then nil
+      then :done
       else recur (inc (current))
   }
 }
@@ -790,10 +785,10 @@ This introduces the `yield` reserved word, to be used in a `gen` expression that
 
 ```
 fn seq with {
-  (h as :hashmap) -> seq (list (h))
-  (s as :set) -> seq (list (s))
-  (s as :string) -> seq (list (s))
-  (l as :list) -> gen (l) with {
+  (h as Hashmap) -> seq (list (h))
+  (s as Set) -> seq (list (s))
+  (s as String) -> seq (list (s))
+  (l as List) -> gen (l) with {
     ([]) -> nil
     ([first, ...rest]) -> {
       yield first
@@ -803,11 +798,11 @@ fn seq with {
 }
 
 fn range with {
-  (end as :number) -> range (0, end, 1)
-  (start as :number, end as :number) -> range (start, end, 1) 
-  (start as :number 
-    end as :number 
-    step as :number) -> gen (start) (current) -> {
+  (end as Number) -> range (0, end, 1)
+  (start as Number, end as Number) -> range (start, end, 1) 
+  (start as Number 
+    end as Number 
+    step as Number) -> gen (start) (current) -> {
       yield current
       if gte (current, end)
         then nil
@@ -816,13 +811,13 @@ fn range with {
 }
 ```
 
-Generators may well be a later nice-to-have, but I suspect the protocol (dead simple, cribbed largely from JS) will be pretty core, and need to be established pretty early.
+Generators may well be a later nice-to-have, but I suspect the protocol (dead simple, cribbed largely from JS) will be pretty core, and need to be established pretty early. (Status: not yet begun, for a later iteration.)
 
-##### Protocols & conventions in the language
+##### Protocols & conventions in the language (Status: likely superseded by real types)
 Following on the convention here of `(:value, x)`/`(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?--see above on the pipeline operators), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`) Anyway, you could also have `unwrap_or`, which takes a default value instead of panicking. But: the short-circuiting of monadic bind is deeply useful.
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?--see above on the pipeline operators), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`) Anyway, you could also have `unwrap_or`, which takes a default value instead of panicking. But: the short-circuiting of monadic bind is deeply useful. (Status: avoiding monads.)
 * Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil` as well as an error result?
 * Stopping reduction is done by convention with a tuple: `(:stop, result)` stopes the reduction and returns the result.
 
@@ -830,7 +825,7 @@ Following on the convention here of `(:value, x)`/`(:done, y)`, I am thinking ab
 There are functions that will very likely want to have special behaviour: truly variadic, and also short-circuiting, to wit:
 * Core conditional functions: `eq`, `and`, `or`. These are important because we want these both to be indefinitely-variadic as well as short-circuit on the first relevant argument. This means their execution model is fundamentally different.
 * Some mathematical functions, e.g. `add`, `mult`, etc., which are usefully truly variadic.
-* _To be continued..._
+* Status: `eq` and mathematical functions will be variadic from the get-go, and the basics are already in the prelude. `and` and `or`, to do their short-circuiting, must actually be special forms, hard-written into the interpreter.
 
 #### Errors and error handling
 Error handling is so, so very important to Ludus. I'm mostly cribbing from other sources here (see especially https://github.com/apple/swift/blob/swift-5.5-RELEASE/docs/ErrorHandlingRationale.rst). But there are a few types of errors, and it's worth being cognizent of them:
@@ -851,7 +846,7 @@ Error handling is so, so very important to Ludus. I'm mostly cribbing from other
 * A deep thought, related to error handling and also name binding behavior: perhaps a REPL really is the wrong model. The notebook/script model may well be more interesting. Particularly to the extent that non-recoverable panics and statically bound names both really militate against the REPL, but work perfectly well with the notebook version. (And, since we're thinking transitional objects here: a notebook/file in an editor is something learners will be comfortable with, where an interactive REPL prompt is actually *not* something most will be comfortable with.)
 * A note regarding the above: `if let` also helps tame some error handling. The test expression in an `if` doesn't swallow all panics, only those that come from a `let` expression failing to match. This way, `match` expressions don't proliferate. Especially when you're trying to match on multiple values and stuffing them into a tuple feels unnatural, this lets you avoid nested `match` expressions.
 
-#### Imports
+#### Imports (status: not yet done.)
 Originally, I had been thinking of imports as being on the model of Node's `require`: a function that took a string (path to a file), and returned the value of evaluating the script in the file. That's dead simple! But also makes a number of things we want to do much, much more complicated. For example, we want imports to be statically available at compile time, so that we can, say, blow up very early on accessing missing members of namespaces (instead of a runtime error).
 
 That suggests we want a special import construct: `import "foo.ld" as Foo`. This looks like a statement, but like a `let`, this simply evaluates to the return value of `foo.ld`. But also--and here's the thing we like--the way the parser is coming together, this lets us allow an `import` only in the script context. It cannot be in a block or in a function. (Shall we enforce ordering? Or is that too precious?)
@@ -860,5 +855,5 @@ In addition, since Ludus has no provision for shared global state, there's execu
 
 Finally, as a possible nice shortcut, if a script, `quux.ld`, returns a namespace, `ns Quux { foo, bar, baz }`, then you can `import "quux.ld"` and if automagically binds that namespace to `Quux` in your script. This may or may not be advisable; it's not so much extra typing to write `as Quux`. Binding names should probably always be explicit?
 
-#### Testing
+#### Testing (status: a nice fantasy)
 From Rust and Zig, a good idea: put tests in the same file. `test {label} expr`. Doesn't run during execution (is totally ignored), but there'll be a test mode of some kind (`ludus test script.ld`). Tests won't be added to the AST during execution and so can go after an expression that's the return value of a script.
