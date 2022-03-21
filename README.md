@@ -1,35 +1,37 @@
 # ludus-spec
 ## A draft specification for the Ludus language
 
+Last revised 20 March 2022.
+
 ### Overview
 Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. As well as Elixir (which itself draws from Clojure, but has a more "modern" syntax). It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
 * It is expression-based.
-* It is immutable by default, including only persistent data structures.
+* It relies on immutability, including only persistent or immutable data structures.
 * It uses pattern-matching extensively.
 
 #### The spirit of Ludus
-"Ludus" is Roger Caillois's name for rule-bound play. To Logo, Ludus adds an emphasis on strictness. This is because the stricter the language, the better the errors you can generate. And better errors mean better learning. Also, because Ludus is meant for learners, a complex type system is unnecessary overhead. So, Ludus is meant to be as strict as you can plausibly be in a dynamic language.
+"Ludus" is Roger Caillois's name for rule-bound play. To Logo, Ludus adds an emphasis on strictness. This is because the stricter the language, the better the errors you can generate. And better errors mean better learning. Also, because Ludus is meant for learners, a complex type system is unnecessary overhead--although a lightweight but strict type system is a boon. Ludus is meant to be as strict as you can plausibly be in a dynamic language.
 
 ### Syntax & language base
 
-#### Whitespace
-Ludus has minimally significant whitespace. Newlines are the ends of expressions (unless preceded by `\`). Newlines can also be used as separators in collection literals (see below).
+#### Whitespace (status: done)
+Ludus has minimally significant whitespace. Newlines are the ends of expressions (with a few exceptions, where Ludus allows a single newline for better readability). Newlines can also be used as separators in collection literals (see below).
 
 Indentation (tabs or spaces) are not, however, significant.
 
-#### Comments
+#### Comments (status: done)
 Comments are indicated by an ampersand, `&`. The rest of the line is ignored:
 
 ```
 & this is a comment
 & this is also a comment
-"This is a string, not a comment"
+"This is a string, not a comment" & comments can terminate lines
 ```
 
-##### Docstring comments
+##### Docstring comments (status: to do)
 In function expressions (see below), there's a special kind of comment that provides documentation for the function. It begins with three ampersands: `&&& this is a docstring comment`. Docstring comments can contain markdown that will be formatted in automatically generated documentation.
 
-#### Literal atoms
+#### Literal atoms (status: done, unless otherwise noted)
 Ludus has several builtin literal types: `nil`, Booleans, numbers, keywords, and strings. (More on the type system below.)
 
 ##### `nil`
@@ -43,7 +45,7 @@ Ludus has one number type, 64-bit floating point numbers. You may write numbers 
 
 This has the upside of not bothering new users with multiple number types (as with everything in computers, numbers are shockingly complicated). It has the downside of all of the IEEE floating-point math hell, which learners won't touch right away but will cause pain down the line (floats come for us all).
 
-###### Constants
+###### Constants (status: to do)
 Ludus defines some (which?) constants, with specific names. `Infinity`, `Pi`, and so on. Note that these are capitalized (are they?--traditionally, they would be ALL_CAPS, which, ::sad face emoji::). These aren't defined at the language level, they're just named values in the prelude.
 
 ##### Keywords
@@ -55,10 +57,10 @@ Characters that terminate words: here's the set of terminator characters (as Clo
 ##### Strings
 UTF8 strings are set off by double quotes: `"this is a string"`. Strings may be split across lines with a `\` before the newline. (Strings are also complicated!)
 
-###### Unresolved design decision: string inerpolation
-* Do we want string interpolation? It's useful in string literals: `"string string {interpolation} string string"`. _Temporary decision: yes, interpolation, but deferred until later._ NB: Rust has recently added support for a light duty (safer) version of this, where what's interpolated isn't any arbitrary expression but only bound names. I think this may be a way to go.
+###### String inerpolation (status: to do)
+* Do we want string interpolation? (We do.) It's useful in string literals: `"string string {interpolation} string string"`. _Temporary decision: yes, interpolation, but deferred until later._ NB: Rust has recently added support for a light duty (safer) version of this, where what's interpolated isn't any arbitrary expression but only bound names. I think this may be a way to go.
 
-#### Literal collections
+#### Literal collections (status: done, unless otherwise noted)
 Ludus has several different collections with literal representations in the language: tuples, lists, hashmaps, and sets. All collections are immutable, and are compared by value, not reference. All collections in Ludus can hold values of any type, including other collections. When they are indexed, they are zero-indexed.
 
 ##### Tuples
@@ -66,8 +68,10 @@ Tuples are the most basic collection type: they group values together. They are 
 
 Tuple literals are also how Ludus represents arguments for function application.
 
-###### Mostly-resolved design decision: Tuples, splats, variadic functions, and the stack
-This is a major design decision, and one I think has some important consequences for Ludus. Tuples cannot be splatted into. This means that every tuple has a statically known length at compile time. And that also means that every function call has an explicit arity at compile time. Moreoever, while there is an (easy, often-used) way to write variadic functions, every function has a collection of explicit, statically-known arities at compile time. This means we can catch "wrong number of arguments" errors at compile time. It means we can optimize pattern matching. And it also means that tuples, when we get to a VM, can be stored on the stack rather than on the heap (making them fast!).
+(In fact, function application is a special kind of general pattern matching.)
+
+###### Resolved design decision: Tuples, splats, variadic functions, and the stack
+Tuples cannot be splatted into. This means that every tuple has a statically known length at compile time. And that also means that every function call has an explicit arity at compile time. Moreoever, while there is an (easy, often-used) way to write variadic functions, every function has a collection of explicit, statically-known arities at compile time. This means we can catch "wrong number of arguments" errors at compile time. It means we can optimize pattern matching. And it also means that tuples, when we get to a VM, can be stored on the stack rather than on the heap (making them fast!).
 
 It's worth tracing the design space here, because the three langauges that are sources of inspiration here do things differently:
 
@@ -77,7 +81,7 @@ Clojure, being a Lisp, articulates a profound homology between lists and functio
 
 So Ludus follows Elixir here, it's easy to have variadic functions. Or, to be precise, it's easy to have multiple functions with the same name with different arities (all of which are explicit). In Elixir, the function name includes the arity, e.g. `foo/2` and `foo/3` are different functions. Using the function name without the arity suffix is sugar, since the number of arguments applied to the function is known at compile time. This is the strategy Ludus will take, although Ludus will elevate this from sugar to language. So inside of Ludus, you'll never know that `foo/2` and `foo/3` are implemented as different functions; there will be no way to differentiate between function arities in this way. But! To make Ludus function calls as fast as possible (even with the treewalk interpreter in Clojure), we will use this strategy under the hood. 
 
-And yet, there are more than a few core language features that feel like they want indefinitely-variadic behavior: `string`, `print`, etc. Can we call these "special forms" and be done with it?
+And yet, there are more than a few core language features that feel like they want indefinitely-variadic behavior: `string`, `print`, etc. Can we call these "special forms" and be done with it? (Answer: yes. And there are a few more special forms than that, even.)
 
 ###### Commas
 Commas separate expressions in all collection literals. 
@@ -133,10 +137,10 @@ Newlines separate items, as with other collections, but both the keyword and the
 
 ```
 
-###### Hashmap syntatic sugaring
+###### Hashmap syntatic sugaring (status: done)
 There will be some level of syntactic sugar for dealing with hashmaps. Possibilities include:
-* Bound name shorthands: If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo <- 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
-* Colon placement: the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
+* Bound name shorthands (yes): If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo <- 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
+* Colon placement (no): the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
 
 ###### Unresolved not-quite-design-decision: Naming hashmaps
 One of the nice points of "20 Things" is that Logo is not just a language, but also (among other things!) a vocabulary for talking about things. A hashmap is a nice, explicit term for what this collection is (it has other names). But it is jargony. Other possibilities for Ludus: object, dictionary, map, hash. We should resolve this. Partly because the syntax here, beginning with `#{`, is meant to be a visual cue to "hash": now that we have hashtags, this looks obviously like a hash-thing.
@@ -144,8 +148,8 @@ One of the nice points of "20 Things" is that Logo is not just a language, but a
 ##### Sets
 Sets are unordered, unindexed collections of unique items (of any value). They are written between curly braces, introduced by a dollar sign: `${"foo", :bar, 3.14, "foo"} &=> ${"foo", :bar, 3.14}`. Note that `${1, 2, 3}` and `${3, 2, 1}` are equal. (The dollar sign looks like an S, for set.)
 
-#### Operators
-Ludus has very small set of operators: assignment (`<-`), splat (`...`), pipeline (`|>`), and match (`->`). The use of these is described below.
+#### Operators (status: still in design)
+Ludus has very small set of operators: assignment (`=`), splat (`...`), pipeline (TBD), and match (`->`). The use of these is described below.
 
 #### Function application
 Ludus has a great many built-in functions (especially since there are no basic operators for things like addition!). Functions can be variadic (take different numbers of arguments, with different behaviours based on those numbers). Functions are written by writing the name of the function as a word with the arguments following in a tuple literal: `foo (bar, baz)`. (Note that the space the function name and arguments tuple is idiomatic, but optional: `foo(bar, baz)` is valid Ludus.) To invoke a function with zero arguments, use the empty tuple: `quux ()`.
