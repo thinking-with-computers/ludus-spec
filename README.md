@@ -857,3 +857,11 @@ Finally, as a possible nice shortcut, if a script, `quux.ld`, returns a namespac
 
 #### Testing (status: a nice fantasy)
 From Rust and Zig, a good idea: put tests in the same file. `test {label} expr`. Doesn't run during execution (is totally ignored), but there'll be a test mode of some kind (`ludus test script.ld`). Tests won't be added to the AST during execution and so can go after an expression that's the return value of a script.
+
+### TODO
+Things to clean up in this document:
+
+* As it goes on, this gets far away from the descriptive tone I was hoping for. Rework this further to show less of my work and get far more declarative.
+* Add a moment on forms that must go in the script vs. other contexts: `import`, `data`, `ns`, etc. must all go in the script context to allow static analysis.
+* Remove `var`s, replace them with `ref`s. (See memory.md, but that doesn't actually spell out `ref` syntax or semantics, really.)
+
