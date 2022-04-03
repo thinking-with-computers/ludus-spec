@@ -148,6 +148,12 @@ One of the nice points of "20 Things" is that Logo is not just a language, but a
 ##### Sets
 Sets are unordered, unindexed collections of unique items (of any value). They are written between curly braces, introduced by a dollar sign: `${"foo", :bar, 3.14, "foo"} &=> ${"foo", :bar, 3.14}`. Note that `${1, 2, 3}` and `${3, 2, 1}` are equal. (The dollar sign looks like an S, for set.)
 
+###### Unresolved design decision: Set syntax
+Conceptually, I think sets are more like lists than like hashmaps. Perhaps they ought to be written with square brackets instead of braces, e.g. `$[1, 2, 3]`.
+
+##### Structs
+Structs are identical to hashmaps in their literal construction and the methods of getting things out of them. However, instead of returning `nil` for members that aren't there, trying to access a member that isn't there will cause a panic. Structs are also fixed in size, and use full copy-on-write semantics for any modification (as opposed to the hashmap's persistence). They are the data structure behind namespaces and data types.
+
 #### Operators (status: still in design)
 Ludus has very small set of operators: assignment (`=`), splat (`...`), pipeline (TBD), and match (`->`). The use of these is described below.
 
