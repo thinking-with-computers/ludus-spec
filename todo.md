@@ -57,6 +57,7 @@ As of Apr 3, 2022.
 ### Core language design features
 * [ ] should numbers be a single type or two?
 * [ ] should sets look like lists instead of hashes?
+* [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
 
 ### Core language improvements
 * [ ] string interpolation w/ names only
@@ -69,6 +70,8 @@ As of Apr 3, 2022.
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
 
+#### Core language prelude
+A language is more than syntax. Make some determinations about what needs to call out to the host language (Clojure; Zig?), and what can be implemented in Ludus.
 
 #### Core language static analysis
 * [ ] no unbound names
