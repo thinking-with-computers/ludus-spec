@@ -33,19 +33,37 @@ As of Apr 3, 2022.
 * [ ] error reporting
 * [ ] wire up Ludus CLI
 * [ ] `ref`s
-* [ ] function pipelines
+* [ ] function pipelines / `do` expressions
 * [ ] partial function application
+* [ ] additional patterns
+	- [ ] hashmap
+	- [ ] struct
+	- [ ] list
+	- [ ] set?
+	- [ ] ignored words
+	- [ ] `else`
+* [ ] iteration expressions
+	- [ ] `loop`
+	- [ ] `repeat`
+	- [ ] `gen`
+* [ ] splats for:
+	- [ ] hashmaps
+	- [ ] lists
+	- [ ] sets
 
 ### Core language design features
 * [ ] should numbers be a single type or two?
 * [ ] should sets look like lists instead of hashes?
 
 ### Core language improvements
-* [ ] design/develop a framework for static analysis
 * [ ] string interpolation w/ names only
-* [ ] splats for:
-	- [ ] hashmaps
-	- [ ] lists
-	- [ ] sets
+* [ ] tail call optimization
+* [ ] design/develop a framework for static analysis
 
-### 
+#### Core language static analysis
+* [ ] no unbound names
+* [ ] no re-binding of names
+* [ ] `recur` is in tail position of loop
+
+### Language additions
+* [ ]
