@@ -32,6 +32,7 @@ As of Apr 3, 2022.
 * [ ] wire up a pretty-printer for values
 * [ ] error reporting
 * [ ] wire up Ludus CLI
+* [ ] `ref`s
 
 ### Core language design features
 * [ ] should numbers be a single type or two?
@@ -44,3 +45,5 @@ As of Apr 3, 2022.
 	- [ ] hashmaps
 	- [ ] lists
 	- [ ] sets
+
+### 
