@@ -726,7 +726,7 @@ In addition, it's worth holding onto a basic distinction between errors in busin
 
 Pattern matching will be driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
 
-The thought for now: there should be no user-facing error system other than returning error types/tuples, and `panic!`. Let's see how far we can get before we need something more sophisticated. (Status: `panic!` exists and does indeed halt the world; yet to add: any information at all along with a panic.)
+The thought for now: there should be no user-facing error system other than returning error types/tuples, and `panic!`. Let's see how far we can get before we need something more sophisticated. (Status: `panic!` exists and does indeed halt the world; yet to add: any information at all along with a panic. Also, result tuples are not the thing; data types are.)
 
 This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust/Go: you have results and panics, and that's more or less it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there).
 
