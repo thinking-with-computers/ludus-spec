@@ -141,6 +141,7 @@ Newlines separate items, as with other collections, but both the keyword and the
 There will be some level of syntactic sugar for dealing with hashmaps. Possibilities include:
 * Bound name shorthands (yes): If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo <- 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
 * Colon placement (no): the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
+* Things other than keywords as keys (maybe?): Clojure allows you to use arbitrary values as keys in maps. Do we want that behaviour? Or do we stick with keywords?
 
 ###### Unresolved not-quite-design-decision: Naming hashmaps
 One of the nice points of "20 Things" is that Logo is not just a language, but also (among other things!) a vocabulary for talking about things. A hashmap is a nice, explicit term for what this collection is (it has other names). But it is jargony. Other possibilities for Ludus: object, dictionary, map, hash. We should resolve this. Partly because the syntax here, beginning with `#{`, is meant to be a visual cue to "hash": now that we have hashtags, this looks obviously like a hash-thing.
