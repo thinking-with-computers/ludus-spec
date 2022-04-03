@@ -61,7 +61,10 @@ As of Apr 3, 2022.
 * [ ] string interpolation w/ names only
 * [ ] tail call optimization
 * [ ] design/develop a framework for static analysis
-* [ ] LSP
+* [ ] syntax highlighting
+	- [ ] SublimeText
+	- [ ] VSCode
+* [ ] full LSP support
 
 #### Core language static analysis
 * [ ] no unbound names
