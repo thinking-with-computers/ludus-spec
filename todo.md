@@ -69,13 +69,15 @@ As of Apr 3, 2022.
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
 
+
 #### Core language static analysis
 * [ ] no unbound names
 * [ ] no re-binding of names
 * [ ] `recur` is in tail position in `loop`
 * [ ] propery function arity
+* [ ] no invalid namespace access
+* [ ] detect some illegal struct field access
 * [ ] enforce `when` clause function restrictions
-* [ ] namespace property access
 
 ### Language additions/extensions
 These may or may not land in Ludus, and aren't necessary to start playing around with Ludus.
