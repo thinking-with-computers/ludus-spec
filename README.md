@@ -650,7 +650,7 @@ The left hand side of a `var` match must be a simple name, not a destructuring p
 #### Closures (status: in design, see memory.md)
 Note that in the `count_up` example, `increment_counter` is able to access `a_counter`, which is _not_ accessible outside that block. `increment_counter` _closes over_ its lexical scope, and can continue to access it. (It can also close over things all the way up to the script level. Nothing in the prelude is mutable, so it doesn't matter.) This allows for the very careful and explicit management of mutable state.
 
-#### Keywords and accessing hashmaps (status: mostly done)
+#### Keywords and accessing hashmaps (status: done)
 How do you get values out of hashmaps? The keys are keywords. There are two syntactical options, _functional keywords_ and _keyword accessors_:
 * Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords at the root of synthetic expressions are done; keywords as higher-order functions are not, nor are pipelines.)
 * Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`. (Status: done.)
