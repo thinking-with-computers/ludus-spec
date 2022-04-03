@@ -749,7 +749,7 @@ Here are those that are tentative or possibly proposed in this document or relat
 `defer`, `data`, `module`, `import`.
 
 Others that are possible are:
-`assert`, `async`, `await`, `catch`, `enum`, `finally`, `mod`, `try`, `type`, `wait`, `pattern`, `raise`, `return`.
+`assert`, `async`, `await`, `catch`, `data`, `enum`, `finally`, `mod`, `try`, `type`, `wait`, `pattern`, `raise`, `return`.
 
 #### Some nice-to-haves
 * Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions). (Status: superseded by a proposed `if`/`let`) pattern, in which any names bound in the test expression of an `if` are available in the `then` expression, and any errors dump you to the `else` expression (with no names bound).
