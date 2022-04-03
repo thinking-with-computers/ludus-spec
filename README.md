@@ -724,7 +724,7 @@ As a learner-oriented language, Ludus must have excellent and informative error 
 
 In addition, it's worth holding onto a basic distinction between errors in business logic and errors in code. Calling a function with the wrong number or type of arguments is not an error a system tolerates; whereas division by zero or not getting the right input from a user should not bring down a system. A result type is our friend for the latter (either result tuples or a dedicated type). The former should, in fact, halt the world.
 
-Pattern matching will driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
+Pattern matching will be driving most of the runtime errors we'll get (call a function with the wrong number of arguments is actually a failure to match the arguments tuple against any of the patterns in the function clauses). Because of that, errors around pattern matching will have to be stellar.
 
 The thought for now: there should be no user-facing error system other than returning error types/tuples, and `panic!`. Let's see how far we can get before we need something more sophisticated. (Status: `panic!` exists and does indeed halt the world; yet to add: any information at all along with a panic.)
 
