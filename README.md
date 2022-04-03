@@ -45,6 +45,9 @@ Ludus has one number type, 64-bit floating point numbers. You may write numbers 
 
 This has the upside of not bothering new users with multiple number types (as with everything in computers, numbers are shockingly complicated). It has the downside of all of the IEEE floating-point math hell, which learners won't touch right away but will cause pain down the line (floats come for us all).
 
+###### Wait, but really?
+A single number type is sometimes understood to be a major design flaw of JavaScript. Clojure uses its host language number types: Java's `long` and `double` on the JVM, and JS's floats-everywhere in ClojureScript. Ludus may want to differentiate between ints and floats. Maybe? Why? What are the arguments here?
+
 ###### Constants (status: to do)
 Ludus defines some (which?) constants, with specific names. `Infinity`, `Pi`, and so on. Note that these are capitalized (are they?--traditionally, they would be ALL_CAPS, which, ::sad face emoji::). These aren't defined at the language level, they're just named values in the prelude.
 
@@ -233,7 +236,12 @@ let [head, ...tail] = [1, 2, 3, 4] & head is 1, tail is [2, 3, 4]
 ```
 
 ###### Hashmaps (status: not yet done)
-Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the right bind to words on the left. So: `let #{foo} = #{:foo 42}` matches, and binds `foo` to `42`.Hashmap patterns can also include rest patterns, which will bind any key/value pairs that aren't explicitly invoked on the left hand side: `let #{foo, ...rest} = #{:foo 42, :bar 23, :baz 3.14}` binds `rest` to `#{:bar 23, :baz 3.14}`. Placeholders may be used as the value in a key/value pair to match any value held at a key (i.e. if they key is defined on the hashmap).
+Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the right bind to words on the left. So: `let #{foo} = #{:foo 42}` matches, and binds `foo` to `42`. Hashmap patterns can also include rest patterns, which will bind any key/value pairs that aren't explicitly invoked on the left hand side: `let #{foo, ...rest} = #{:foo 42, :bar 23, :baz 3.14}` binds `rest` to `#{:bar 23, :baz 3.14}`. Placeholders may be used as the value in a key/value pair to match any value held at a key (i.e. if they key is defined on the hashmap).
+
+###### Other collections? (status: not yet decided)
+Do we want matches on sets? Would that even make sense? They're both unordered and un-keyed.
+
+Structs, however, are useful. Do we want to unify struct and hashmap pattern matching?
 
 #### Splats in expressions (status: not yet done)
 **See above for a discussion of tuple splats.**
