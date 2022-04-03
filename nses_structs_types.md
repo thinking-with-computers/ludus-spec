@@ -108,17 +108,22 @@ If there is some parsing way to distinguish between types and normal values (lik
 ```
 data Node {
 	Bool {:value as Boolean}
-	Numb {:value as Number},
+	Num {:value as Number},
 	Str {:size as Number, :value as String}
 	Tup {:size as Number, :members as List}
-	...
+	&...
 }
 
 let str = Str {:size 3, :value "foo"}
 str :size &=> 3
 str :value &=> foo
+str :foo &=> panic!
 
-
+fn value (v) -> match v as Node {
+	Bool | Num | Str -> v :value & note | as "or", omission of `_`
+	Tup -> v :members
+	else -> nil
+}
 
 ```
 
