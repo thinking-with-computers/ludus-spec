@@ -2,7 +2,7 @@
 
 What is the model for interactivity for Ludus? What models for interactivity with code are there? What models for interactivity with computing are there?
 
-The questions telescope, and get very broad very quickly. There are ways to tame them: tracing the historical paths that early technologists like Papert and Engelbart followed; following some intutions based on our experiences; looking to contemporary models; doing some formal analysis.
+The questions telescope, and get very broad very quickly. There are ways to tame them: tracing the historical paths that early technologists like Papert and Engelbart followed; following some intuitions based on our experiences; looking to contemporary models; doing some formal analysis.
 
 We'll do all of those in turn, and a little bit here.
 
