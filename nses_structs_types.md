@@ -77,7 +77,7 @@ data Result {
 	Error (info)
 }
 
-fn may_fail () -> if gte(random (), 0.5)
+fn may_fail () -> if gte (random (), 0.5)
 	then Ok (:ok)
 	else Error (:failed)
 
