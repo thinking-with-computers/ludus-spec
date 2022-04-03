@@ -731,7 +731,7 @@ The thought for now: there should be no user-facing error system other than retu
 This is "crash only" error semantics. Which is *very* far away from Scheme (with resumable errors), but I've never myself grokked resumable errors. This is close to Rust/Go: you have results and panics, and that's more or less it. It's also not far from the Beam (Elixir/Erlang) model, where if something bad happens, you just crash (and get restarted by a supervisor, but we're not there).
 
 #### Static analysis (status: a nice fantasy)
-Following from commitments to good & early errors, Ludus should do aggressive static analysis to discover errors early. We do it when we can, for the most common use cases. It will be possible to frustrate static analysis by doing things in obscurantist ways, but if you stay on the static-analysis happy path, you'll get something pretty robust. So, for example, I think we can get (for things that might normally be dynamic):
+Following from commitments to good & early errors, Ludus should do aggressive static analysis to discover errors early. We do it when we can, for the most common use cases. It will be possible to frustrate static analysis by doing things in obscurantist ways (which effectively involve crossing the function boundary), but if you stay on the static-analysis happy path, you'll get something pretty robust. So, for example, I think we can get (for things that might normally be dynamic):
 * Function arity checking.
 * Namespace member access.
 * Mutation out-of-scope.
