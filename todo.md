@@ -33,6 +33,8 @@ As of Apr 3, 2022.
 * [ ] error reporting
 * [ ] wire up Ludus CLI
 * [ ] `ref`s
+* [ ] function pipelines
+* [ ] partial function application
 
 ### Core language design features
 * [ ] should numbers be a single type or two?
