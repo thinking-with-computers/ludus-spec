@@ -44,6 +44,7 @@ As of Apr 3, 2022.
 	- [ ] set?
 	- [ ] ignored words
 	- [ ] `else`
+	- [ ] `as` in patterns
 * [ ] iteration expressions
 	- [ ] `loop`
 	- [ ] `repeat`
@@ -62,15 +63,41 @@ As of Apr 3, 2022.
 * [ ] tail call optimization
 * [ ] design/develop a framework for static analysis
 * [ ] syntax highlighting
-	- [ ] SublimeText
+	- [ ] SublimeText (this first, it's much easier)
 	- [ ] VSCode
-* [ ] full LSP support
+* [ ] LSP language server
+* [ ] `when` clauses in patterns
+	- [ ] which functions are allowed in `when` clauses?
 
 #### Core language static analysis
 * [ ] no unbound names
 * [ ] no re-binding of names
-* [ ] `recur` is in tail position of loop
+* [ ] `recur` is in tail position in `loop`
+* [ ] propery function arity
+* [ ] enforce `when` clause function restrictions
+* [ ] namespace property access
 
-### Language additions
+### Language additions/extensions
+These may or may not land in Ludus, and aren't necessary to start playing around with Ludus.
 
-#### 
+#### Datatypes + polymorphism
+One possibility with Ludus is to develop a set of extensions to the core language that will enable additional kinds of strictness, as well as more ergonomic use of the language.
+
+The biggest design decision is whether to add them at all.
+
+The next biggest design decision is whether/how to distinguish between data constructors and regular functions. (This is not necessary if data constructors only take tuples, but will be necessary if they also take structs.)
+
+Taken together, we have three things that are useful:
+* [ ] datatypes
+	- [ ] bare (`data Unique`)
+	- [ ] with tuples (`data Tagged (value)`)
+	- [ ] with structs (`data Color {:red as Number; :green as Number; :blue as Number}`)
+	- [ ] sum types/enums
+		* [ ] bare (`data Status { Loading; Loaded; Error }`)
+		* [ ] with tuples (`data Result { Ok (value) ; Error (info)`)
+		* [ ] with structs (...)
+* [ ] modules
+* [ ] methods
+	- [ ] design syntax (e.g., `::method`)
+* [ ] `as` in `match` expressions (e.g. `match r as Result`)
+* [ ] static analysis: exhaustiveness checking
