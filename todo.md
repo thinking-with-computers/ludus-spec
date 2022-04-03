@@ -29,8 +29,10 @@ As of Apr 3, 2022.
 * [ ] add location information to panics
 * [ ] `import` expressions
 * [ ] `ns` expressions (structs + names?)
-* [ ] wire up a pretty-printer for values
-* [ ] error reporting
+* [ ] wire up a pretty-printer for Ludus values
+* [ ] parse error reporting
+	- [ ] with line numbers
+	- [ ] with nice text
 * [ ] wire up Ludus CLI
 * [ ] `ref`s
 * [ ] function pipelines / `do` expressions
@@ -59,6 +61,7 @@ As of Apr 3, 2022.
 * [ ] string interpolation w/ names only
 * [ ] tail call optimization
 * [ ] design/develop a framework for static analysis
+* [ ] LSP
 
 #### Core language static analysis
 * [ ] no unbound names
@@ -66,4 +69,5 @@ As of Apr 3, 2022.
 * [ ] `recur` is in tail position of loop
 
 ### Language additions
-* [ ]
+
+#### 
