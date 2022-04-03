@@ -100,8 +100,13 @@ These would not be parametric (you don't need parametric datatypes if can be agn
 
 What comes after the data constructor (vs. the datatype) is a tuple pattern. The structure of the data is enforced by pattern matching against what you pass the constructor, which is called as a function. Datatypes, like named tuples, like tuples, have a statically-known size.
 
-#### Unresolved design decision
-The very stinky code smells above look like: trying to match against a datatype you don't know: that you get as a return value of a function, that you get as a paramter to a function, &c. That doesn't really make any sense, since if you don't know the type, you also don't know the data constructors for the left hand side of the match clause. This kind of pattern matching is extremely nominal rather than the structural stuff we have everywhere else.
+#### Tuples vs structs
+In principle, datatypes need only require values of statically-known sizes, so that means *both* tuples and structs.
+
+If there is some parsing way to distinguish between types and normal values (like Haskell, types are capitalized), then we could have structs after datatypes, not just tuples.
+
+#### Unresolved design decision 
+The very stinky code smells above look like: trying to match against a datatype you don't know: that you get as a return value of a function, that you get as a parameter to a function, &c. That doesn't really make any sense, since if you don't know the type, you also don't know the data constructors for the left hand side of the match clause. This kind of pattern matching is extremely nominal rather than the structural stuff we have everywhere else.
 
 I don't yet have a grasp on the design space here (including how to parse the LHS of a match clause). But my intuition says there should be a way of statically determining if a type & its constructors are correct without resorting to parsing schemes like requiring names of types and constructors to be the only things that are capitalized (which, in any event, would be difficult here), or separating values and types into separate realms, which seems anti-lispish, anti-Ludusish.
 
