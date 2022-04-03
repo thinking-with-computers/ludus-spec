@@ -103,7 +103,24 @@ What comes after the data constructor (vs. the datatype) is a tuple pattern. The
 #### Tuples vs structs
 In principle, datatypes need only require values of statically-known sizes, so that means *both* tuples and structs.
 
-If there is some parsing way to distinguish between types and normal values (like Haskell, types are capitalized), then we could have structs after datatypes, not just tuples. That would require syntactical changes.
+If there is some parsing way to distinguish between types and normal values (like Haskell, types are capitalized), then we could have structs after datatypes, not just tuples. That would require syntactical changes, e.g.:
+
+```
+data Node {
+	Bool {:value as Boolean}
+	Numb {:value as Number},
+	Str {:size as Number, :value as String}
+	Tup {:size as Number, :members as List}
+	...
+}
+
+let str = Str {:size 3, :value "foo"}
+str :size &=> 3
+str :value &=> foo
+
+
+
+```
 
 #### Unresolved design decision 
 The very stinky code smells above look like: trying to match against a datatype you don't know: that you get as a return value of a function, that you get as a parameter to a function, &c. That doesn't really make any sense, since if you don't know the type, you also don't know the data constructors for the left hand side of the match clause. This kind of pattern matching is extremely nominal rather than the structural stuff we have everywhere else.
