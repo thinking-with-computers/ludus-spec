@@ -650,9 +650,9 @@ The left hand side of a `var` match must be a simple name, not a destructuring p
 #### Closures (status: in design, see memory.md)
 Note that in the `count_up` example, `increment_counter` is able to access `a_counter`, which is _not_ accessible outside that block. `increment_counter` _closes over_ its lexical scope, and can continue to access it. (It can also close over things all the way up to the script level. Nothing in the prelude is mutable, so it doesn't matter.) This allows for the very careful and explicit management of mutable state.
 
-#### Keywords and accessing hashmaps (status: done)
+#### Keywords and accessing hashmaps (status: mostly done)
 How do you get values out of hashmaps? The keys are keywords. There are two syntactical options, _functional keywords_ and _keyword accessors_:
-* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords at the root of synthetic expressions are done; keywords as higher-order functions are not, nor are pipelines.)
+* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords can be called anywhere, but don't raise panics when passed tuples of arities other than 1.)
 * Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`. (Status: done.)
 
 In each case, accessing a key that is not defined in a hashmap returns `nil`. There will be function equivalents to key access which will raise errors with undefined key access. The equivalents to the previous examples: `get(bar, :foo)` gets `:foo` on `bar`; or `get(foo, [:bar, :baz])` gets `foo:bar:baz`.
@@ -662,14 +662,14 @@ Hashmaps are used extensively to create packages of functions. (NB: Probably not
 Property access on any value that is not a hashmap returns `nil`.
 
 ##### Unresolved design decision: namespaces
-Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo <- import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo:inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
+Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo <- import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo :inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
 
 That would give us a syntactical form something like:
 
 ```
-let inc <- add(1, _)
+let inc = add(1, _)
 
-let dec <- sub(_, 1)
+let dec = sub(_, 1)
 
 ns Foo {
   &&& a docstring could go here
