@@ -10,6 +10,6 @@ This means we do, ultimately, have two "realms": that which must be declared sta
 
 And it's super common to have different syntax possibilities in different contexts: `return` can only be used in functions in JS; `import` cannot be in a function. In Ludus, so far, `recur` may only be in loops and generators; and `yield` in generators.
 
-This does raise the question, however, of why not go all in on a static type system, which (beyond the complexity of writing a full HM type system with inference) is actually additional overhead burden for learners. Writing functions with type annotations is not good for your first langauge. Especially if you have to grok the parametric types that would be required to make a full HM type system work. (Also, just learn Elm.)
+This does raise the question, however, of why not go all in on a static type system, which (beyond the complexity of writing a full HM type system with inference) is actually additional overhead burden for learners. Writing functions with type annotations is not good for your first language. Especially if you have to grok the parametric types that would be required to make a full HM type system work. (Also, just learn Elm.)
 
 The idea is to make coding as interactive as possible, to live in the runtime--but to make certain kinds of analysis possible that mean you don't have to take a code path to learn there are errors. And, then also, to be sure that you have excellent _runtime_ errors as well.
