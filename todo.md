@@ -59,6 +59,7 @@ As of Apr 3, 2022.
 * [ ] should sets look like lists instead of hashes?
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
 * [ ] should `ref` swapping be a keyword or a function?
+* [ ] what is the pipeline operator?
 
 ### Core language improvements
 * [ ] string interpolation w/ names only
