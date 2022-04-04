@@ -53,7 +53,7 @@ As of Apr 3, 2022.
 	- [ ] hashmap
 	- [ ] list
 	- [ ] set
-* [ ] `if let` scoping/error pattern
+* [ ] `if let` scoping/errors
 
 ### Core language design features
 * [ ] should numbers be a single type or two?
