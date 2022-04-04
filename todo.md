@@ -50,14 +50,15 @@ As of Apr 3, 2022.
 	- [ ] `repeat`
 	- [ ] `gen`
 * [ ] splats for:
-	- [ ] hashmaps
-	- [ ] lists
-	- [ ] sets
+	- [ ] hashmap
+	- [ ] list
+	- [ ] set
 
 ### Core language design features
 * [ ] should numbers be a single type or two?
 * [ ] should sets look like lists instead of hashes?
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
+* [ ] should `ref` swapping be a keyword or a function?
 
 ### Core language improvements
 * [ ] string interpolation w/ names only
