@@ -30,10 +30,10 @@ As of Apr 3, 2022.
 * [ ] `import` expressions
 * [ ] `ns` expressions (structs + names?)
 * [ ] wire up a pretty-printer for Ludus values
-* [ ] parse error reporting
+* [x] parse error reporting
 	- [ ] with line numbers
 	- [ ] with nice text
-* [ ] wire up Ludus CLI
+* [x] wire up Ludus CLI
 * [ ] `ref`s
 * [ ] function pipelines / `do` expressions
 * [ ] partial function application
