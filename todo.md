@@ -35,7 +35,7 @@ As of Apr 3, 2022.
 	- [ ] with nice text
 * [x] wire up Ludus CLI
 * [ ] `ref`s
-* [ ] function pipelines / `do` expressions
+* [x] function pipelines / `do` expressions
 * [ ] partial function application
 * [ ] additional patterns
 	- [ ] hashmap
