@@ -36,7 +36,9 @@ As of Apr 3, 2022.
 * [x] wire up Ludus CLI
 * [ ] `ref`s
 * [x] function pipelines / `do` expressions
-* [ ] partial function application
+* [x] partial function application
+	- [ ] fix bug: partial application of called keywords. Right now it's `nil`, but it should be something else.
+	- [ ] design decision: is `foo (_)` legal partial application?
 * [ ] additional patterns
 	- [ ] hashmap
 	- [ ] struct
