@@ -38,7 +38,7 @@ As of Apr 3, 2022.
 * [x] function pipelines / `do` expressions
 * [x] partial function application
 	- [ ] fix bug: partial application of called keywords. Right now it's `nil`, but it should be something else.
-	- [ ] design decision: is `foo (_)` legal partial application?
+	- [ ] design decision: is `(_)` even legal partial application? (`foo (_)` vs. `:foo (_)`)
 * [ ] additional patterns
 	- [ ] hashmap
 	- [ ] struct
