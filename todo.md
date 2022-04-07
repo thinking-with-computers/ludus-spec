@@ -1,6 +1,6 @@
 # What we're doing
 
-As of Apr 3, 2022.
+As of Apr 6, 2022.
 
 ### Things already done
 * Atomic values
@@ -25,7 +25,7 @@ As of Apr 3, 2022.
 * a framework for calling Clojure functions
 
 ### Core language features
-* [ ] `cond` expressions
+* [x] `cond` expressions
 * [ ] add location information to panics
 * [ ] `import` expressions
 * [ ] `ns` expressions (structs + names?)
