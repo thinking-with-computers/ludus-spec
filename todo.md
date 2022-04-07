@@ -48,6 +48,8 @@ As of Apr 6, 2022.
 	- [ ] `else`
 	- [ ] `as` in patterns
 	- [ ] splats in patterns
+		* [ ] list
+		* [ ] hashmap
 * [ ] iteration expressions
 	- [ ] `loop`
 	- [ ] `repeat`
