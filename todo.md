@@ -47,6 +47,7 @@ As of Apr 6, 2022.
 	- [ ] ignored words
 	- [ ] `else`
 	- [ ] `as` in patterns
+	- [ ] splats in patterns
 * [ ] iteration expressions
 	- [ ] `loop`
 	- [ ] `repeat`
