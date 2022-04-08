@@ -156,7 +156,9 @@ Sets are unordered, unindexed collections of unique items (of any value). They a
 Conceptually, I think sets are more like lists than like hashmaps. Perhaps they ought to be written with square brackets instead of braces, e.g. `$[1, 2, 3]`.
 
 ##### Structs
-Structs are identical to hashmaps in their literal construction and the methods of getting things out of them. However, instead of returning `nil` for members that aren't there, trying to access a member that isn't there will cause a panic. Structs are also fixed in size, and use full copy-on-write semantics for any modification (as opposed to the hashmap's persistence). They are the data structure behind namespaces and data types.
+Structs are nearly identical to hashmaps in their literal construction, using `@{}` rather than `#{}`. They are identical as to the methods of getting things out of them. However, instead of returning `nil` for members that aren't there, trying to access a member that isn't there will cause a panic. 
+
+Structs are also fixed in size, and use full copy-on-write semantics for any modification (as opposed to the hashmap's persistence). They are the data structure behind namespaces and, if we add them, data types.
 
 #### Operators (status: still in design)
 Ludus has very small set of operators: assignment (`=`), splat (`...`), pipeline (TBD), and match (`->`). The use of these is described below.
