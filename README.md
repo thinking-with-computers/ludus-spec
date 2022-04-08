@@ -685,11 +685,9 @@ How do you get values out of hashmaps or structs? The keys are keywords. There a
 * Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar > :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: done, with one corner case: when passed a placeholder, they return `nil`: `:foo (_) &=> nil`. This should not be the case; but `(_)` is probably not kosher.)
 * Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`. (Status: done.)
 
-In each case, accessing a key that is not defined in a hashmap returns `nil`. There will be function equivalents to key access which will raise errors with undefined key access. The equivalents to the previous examples: `get(bar, :foo)` gets `:foo` on `bar`; or `get(foo, [:bar, :baz])` gets `foo:bar:baz`.
+In each case, accessing a key that is not defined in a hashmap returns `nil`, and accessing a key that it not defined in a struct will cause a panic. There will be function equivalents to key access which will raise errors with undefined key access. The equivalents to the previous examples: `get(bar, :foo)` gets `:foo` on `bar`; or `get(foo, [:bar, :baz])` gets `foo:bar:baz`.
 
-Hashmaps are used extensively to create packages of functions. (NB: Probably not: these will be namespaces, which are actually structs; see nses_structs_types.md.)
-
-Property access on any value that is not a hashmap returns `nil`.
+Property access on any value that is not a hashmap or a struct returns `nil`.
 
 ##### Unresolved design decision: namespaces
 Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `@{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo = import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo :inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
