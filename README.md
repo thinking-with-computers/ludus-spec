@@ -557,8 +557,8 @@ fn fib {
 fn add {
   &&& Adds numbers together.
   () -> 0
-  (x as List) -> reduce (add, x)
   (x as Number) -> x
+  (x as List) -> reduce (add, x)
   (x, y) -> {...native code...}
 }
 ```
@@ -569,7 +569,7 @@ fn add {
 
 `fib` is a bog-standard, slow, recursive Fibonacci function.
 
-`add` is a recursive variadic function: it behaves differently depending on how many arguments you give it. With 0 arguments, you get the addition identity: `0`. With 1, you get back the number unchanged. With 2, you add two numbers together in native code. And with three or more, you get a recursive call that sums all the arguments together. (This is not especially efficient, but it's nicely illustrative.)
+`add` is a recursive variadic function: it behaves differently depending on how many arguments you give it, and what type they are. With 0 arguments, you get the addition identity: `0`. With 1 that is a number, you get back the number unchanged. With 1 that is a list, you get back the sum of numbers in that list. With 2, you add two numbers together in native code.
 
 ###### Clauses and documentation (status: not yet done)
 The left-hand side of all function clauses is given in generated documentation. Using good, descriptive names for arguments is a useful practice for future-you, but also for users of your code.
