@@ -394,7 +394,7 @@ if let (:ok, result) = might_fail
   else handle_failure ()
 ```
 
-Using a block as `test_expr` allows for multiple `let` expressions:
+Using a block as `test_expr` allows for multiple `let` expressions whose mismatches are swallowed:
 
 ```
 if { let foo = bar (); let baz = quux (foo) }
@@ -402,7 +402,7 @@ if { let foo = bar (); let baz = quux (foo) }
   else handle_failure ()
 ```
 
-##### `cond` (status: not yet done)
+##### `cond` (status: done)
 `cond` is a way of testing multiple conditions without nesting `if` expressions. It is the first example of a clause-based expression (`match` and function bodies are also clause-based.) Consider the example:
 
 ```
