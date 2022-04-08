@@ -78,6 +78,7 @@ As of Apr 6, 2022.
 * [ ] LSP language server
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
+* [ ] `|` in match patterns as "or" (e.g., `0 | 1 -> ...` will match zero or one)
 * [ ] improve `import`
 	- [ ] don't allow access further up than CWD (no `..`s in path?)
 	- [ ] how to allow `import` in cljs (not just clj)?
