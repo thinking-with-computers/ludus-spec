@@ -186,15 +186,15 @@ But the following is illegal:
 ##### Partial application (status: complete)
 Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder in a tuple applied to a function. As a consequence, all partially applied functions are unary.
 
-##### Pipeline application (status: in design)
-Ludus also allows for function pipelines. Function piplines are, for now, introduced by the keyword `do`. The pipeline operator is (for now) `|>`:
+##### Pipeline application (status: implemented, but in design review)
+Ludus also allows for function pipelines. Function piplines are, for now, introduced by the keyword `do`. The pipeline operator is (for now) `>`:
 
 ```
-do 2 |> add (1, _) &=> 3
+do 2 > add (1, _) &=> 3
 
-do 2 |> add (1, _) |> mult (2, _) |> pow (_, 2) &=> 36
+do 2 > add (1, _) > mult (2, _) > pow (_, 2) &=> 36
 
-do fn (_) -> :foo |> nil &=> :foo
+do fn (_) -> :foo > nil &=> :foo
 ```
 
 The pipeline operator takes the left-hand side and applies it as a single argument to the expression on its right-hand side (which must therefore be a unary function). Note that pipelined functions are unary; this pairs nicely (and intentionally) with partially-applied unary functions. (See below, re: a bind operator.)
