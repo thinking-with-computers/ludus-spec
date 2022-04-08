@@ -214,7 +214,7 @@ That said, it actually improves code readability to have all assignments set off
 To bind a name, the left hand side of an assignment can be a word: `let foo = true`. The name `foo` is now bound to the value `true`, and anywhere `foo` is used, it will evaluate to `true`. (Note that names may not be re-bound in the same scope; see below.) Words always match against any value. So `let names = ${"Pat", "Chris", "Gabe"}` matches, and binds `names` to the set with names in them (so that `contains? ("Pat", names) &=> true`).
 
 ##### Placeholder (status: done)
-The placeholder also always matches, but does not bind a name: `let _ = :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partrial function application.
+The placeholder also always matches, but does not bind a name: `let _ = :whatever` matches, but binds no names. The placeholder is used in conditional forms, as well as in partial function application.
 
 ##### Collections
 Ludus also allows you to match against collection literals. This is extremely useful and powerful. They are fairly intuitive. Patterns may be nested.
