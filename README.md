@@ -13,7 +13,7 @@ Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps:
 "Ludus" is Roger Caillois's name for rule-bound play. To Logo, Ludus adds an emphasis on strictness. This is because the stricter the language, the better the errors you can generate. And better errors mean better learning. Also, because Ludus is meant for learners, a complex type system is unnecessary overhead--although a lightweight but strict type system is a boon. Ludus is meant to be as strict as you can plausibly be in a dynamic language.
 
 ### Hello, world
-Ludus is deeply expression based, and thus scripts return their last expression to stdout:
+Ludus is deeply expression based. The interpreter just evaluates expressions and returns the last one in a script (or block). Scripts thus return their last expression to stdout:
 
 ```
 & hello.ld
