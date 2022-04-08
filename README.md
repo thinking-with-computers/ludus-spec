@@ -19,7 +19,7 @@ Ludus is deeply expression based, and thus scripts return their last expression 
 & hello.ld
 "Hello, world!"
 
-> ludus hello.ld
+$> ludus hello.ld
 "Hello, world!"
 ```
 
@@ -28,7 +28,7 @@ Or, you can write to stdout, but `print` returns `:ok`:
 & hello.ld
 print ("Hello, world!")
 
-> ludus hello.ld
+$> ludus hello.ld
 Hello, world!
 :ok
 ```
