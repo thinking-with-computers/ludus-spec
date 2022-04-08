@@ -767,14 +767,14 @@ Following from commitments to good & early errors, Ludus should do aggressive st
 * Attempted mutation of non-`var` bindings.
 * Re-binding a bound name.
 
-#### Reserved words (status: done-ish)
+#### Reserved words (status: done-ish; they're trivial to add but other design elements touch this)
 In this document so far, here is the complete list of Ludus reserved words.
 
 Here are the reserved words that will definitely be in the language:
-`as`, `cond`, `else`, `false`, `fn`, `if`, `match`, `mut`, `nil`, `then`, `true`, `var`, `with`, `loop`, `ns`, `recur`, `repeat`, `when`, `yield`.
+`as`, `cond`, `else`, `false`, `fn`, `if`, `import`, `match`, `mut`, `nil`, `then`, `true`, `var`, `with`, `loop`, `ns`, `recur`, `repeat`, `when`, `yield`.
 
 Here are those that are tentative or possibly proposed in this document or related documents: 
-`defer`, `data`, `module`, `import`.
+`defer`, `data`, `module`.
 
 Others that are possible are:
 `assert`, `async`, `await`, `catch`, `data`, `enum`, `finally`, `mod`, `try`, `type`, `wait`, `pattern`, `raise`, `return`.
