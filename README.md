@@ -82,7 +82,7 @@ Characters that terminate words: here's the set of terminator characters (as Clo
 UTF8 strings are set off by double quotes: `"this is a string"`. Normally, they may only be one line. But, strings may be split across lines with a `\` before the newline. (Strings are also complicated!)
 
 ###### Multi-line strings
-Should we allow multi-line strings, either using `"""`, or just allowing multi-line strings, like 
+Should we allow multi-line strings? There are maybe reasons not to, like avoiding multi-line tokens.
 
 ###### String interpolation (status: to do)
 * Do we want string interpolation? (We do.) It's useful in string literals: `"string string {interpolation} string string"`. _Temporary decision: yes, interpolation, but deferred until later._ NB: Rust has recently added support for a light duty (safer) version of this, where what's interpolated isn't any arbitrary expression but only bound names. I think this may be a way to go.
