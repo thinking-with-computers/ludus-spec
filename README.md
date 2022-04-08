@@ -142,7 +142,7 @@ Newlines separate items, as with other collections, but both the keyword and the
 
 ###### Hashmap syntatic sugaring (status: done)
 There will be some level of syntactic sugar for dealing with hashmaps. Possibilities include:
-* Bound name shorthands (yes): If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo <- 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
+* Bound name shorthands (yes): If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo = 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
 * Colon placement (no): the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
 * Things other than keywords as keys (maybe?): Clojure allows you to use arbitrary values as keys in maps. Do we want that behaviour? Or do we stick with keywords? (Parsing might be an issue if we allow `{expr expr}`).
 
@@ -203,7 +203,7 @@ The pipeline operator takes the left-hand side and applies it as a single argume
 Ludus uses pattern matching from the ground up: all assignments are actually patterns. Patterns, generally, do two things: they match (against a value), and they bind names (in a scope).
 
 ##### Basic matching & assignment (status: done)
-The most basic pattern match is assignment, which is introduced by the keyword `let` and uses the assignment operator: `=`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `let true <- true`, `let 42 <- 42`, `let "foo" <- "foo"`, `let [1, 2, 3] <- [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below). (NB: List patterns are not yet complete.)
+The most basic pattern match is assignment, which is introduced by the keyword `let` and uses the assignment operator: `=`. If the right hand value matches the pattern on the left hand, it binds any names on the left-hand side for the balance of the scope (more on scope later). The most basic match is equality: `let true = true`, `let 42 = 42`, `let "foo" = "foo"`, `let [1, 2, 3] = [1, 2, 3]`. Note that these patterns match, but they do not bind any names. If an assignment pattern does not match, Ludus will raise an error (more on errors below). (NB: List patterns are not yet complete.)
 
 ###### New design decision: `let` (status: solid)
 I had an idea like it might be possible and desirable to do without `let` (as Elixir does), but I can tell as I embark on the parser that parsing will be made much easier if we include `let` as a keyword that preceds assignment. (That way, the parser doesn't have to do nearly indefinite lookahead to determine whether you're dealing with a collection literal or a collection pattern.)
@@ -261,7 +261,7 @@ let new_users = #{:Ashley "ashley@outlook.com", ...users}
 & new_users has entries for :Pat, :Chris, and :Ashley
 
 & however, this creates a new hashmap, more idiomatic (and faster) would be:
-let new_users_update <- update (users, :Ashley, "ashley@outlook.com")
+let new_users_update = update (users, :Ashley, "ashley@outlook.com")
 
 & either way, `users` is untouched
 users &=> #{:Pat "pat@gmail.com", :Chris "chris@yahoo.com"}
@@ -317,7 +317,7 @@ sum &=> error! unbound name
 Each block has access to any enclosing scope(s), up to the script level, and then to the prelude.
 
 ##### Scripts (status: done)
-Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `let foo <- import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
+Ludus is, at its heart, a scripting language. Each file, called a script, is its own scope. The script is like a block: it returns its last value, and cannot touch anything outside it. So, when you write `let foo = import ("foo.ld")`, `foo` is bound to the return value (last expression) of the script in `foo.ld`. Each script, of course, has access to Ludus's core set of functions, the prelude (whatever is in that!). Scripts do not have access to each other except through what they return.
 
 ###### Unresolved design decisions: assignments and bindings
 * _What do assignments return?_ One version is that, if there's a match, they simply return the right-hand side. The other version is that they return a special `Nothing` value that never matches against anything in any pattern, ever (and thus will throw an error if one puts a binding as the last line in a block). I'm inclined to say the former, but had originally considered the latter. _Answer: return RHS. Confidence: high._
@@ -624,7 +624,7 @@ References can only be re-bound after the `mut` reserved word. Also, once a refe
 
 ```
 let count_up = {
-  var a_counter <- 0
+  var a_counter = 0
   fn increment_counter () -> mut a_counter = inc (a_counter)
 }
 
@@ -662,7 +662,7 @@ Hashmaps are used extensively to create packages of functions. (NB: Probably not
 Property access on any value that is not a hashmap returns `nil`.
 
 ##### Unresolved design decision: namespaces
-Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo <- import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo :inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
+Unstated here but completely anticipated is that a module/namespace/whatever is just a script which returns a hashmap. Suppose `foo.ld` consists of `#{:inc add(1, _), :dec sub(_, 1)}`. So in `bar.ld` we write `foo = import ("foo.ld)`. `foo:inc (1) &=> 2`, yay! But you fatfinger a thing, and write `foo :inx (1)`, and you get `nil is not a function`. That's not any better than JavaScript! So perhaps we have a special kind of hashmap, a namespace (`ns`), that has usefully different behaviour: it's exactly like a hashmap, except that if you try to access something on it that doesn't exist, you get an error. In our little example: `inx is not defined in namespace Foo`.
 
 That would give us a syntactical form something like:
 
