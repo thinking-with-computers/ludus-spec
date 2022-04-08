@@ -44,7 +44,7 @@ As of Apr 6, 2022.
 	- [ ] struct
 	- [ ] list
 	- [ ] set?
-	- [ ] ignored words
+	- [x] ignored words
 	- [x] `else`
 	- [ ] `as` in patterns
 	- [ ] splats in patterns
