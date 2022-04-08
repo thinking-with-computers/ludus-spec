@@ -597,7 +597,7 @@ To be fast (optimized!), recursion must be managed in a particular way: no recur
 fn sum {
   &&& Returns the sum of a list of numbers.
   ([]) -> 0
-  ([x]) -> add (x, 0)
+  ([x]) -> x
   ([first, ...rest], n) -> {
     let running_total = add (first, n) & broken out for pedagogical purposes
     sum (rest, running_total) & sum appears only as leftmost call on last line
@@ -605,7 +605,7 @@ fn sum {
 }
 ```
 
-Note that both the second and third clauses only contain `sum` in the leftmost position of their return expressions. The Ludus interpreter will understand these to be recursive tail-calls and ensure that this runs quickly.
+Note that the third clause contains `sum` in the leftmost position of its return expression. The Ludus interpreter will understand it to be a recursive tail-call and ensure that it runs quickly.
 
 That said, Ludus makes extensive use of higher-order functions to work on collections. Consider a naive (but tail-call recursive) implementation of the `map` function:
 
