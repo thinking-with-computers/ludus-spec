@@ -78,6 +78,7 @@ As of Apr 6, 2022.
 * [ ] LSP language server
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
+* [ ] improve strictness of `import`
 
 #### Core language prelude
 A language is more than syntax. Make some determinations about what needs to call out to the host language (Clojure; Zig?), and what can be implemented in Ludus.
