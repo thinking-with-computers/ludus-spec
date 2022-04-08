@@ -459,7 +459,7 @@ The formal description here is fairly straightforward: `match <value_expr> with 
 
 As with `cond`, if no clause matches, an error is raised. Also, as with `cond`, there are multiple ways of writing the default case, to wit: idiomatically, the placeholder (`_`) will match and not bind a name. You may also use the reserved word `else`. 
 
-###### Use `else` and `_` (Status: this use of `else` is not yet supported.)
+###### Use `else` and `_` (Status: done.)
 Best practice is to use `else` or `_` for default cases in both `cond` and `match`, since they behave similarly in all conditional forms. If you use a literal truthy value to form your default clause in `cond`, that is substantially different behaviour than using a literal value in `match` (which will only match on equality).
 
 ###### Unresolved design decisions
