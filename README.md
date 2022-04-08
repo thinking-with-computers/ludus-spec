@@ -264,7 +264,7 @@ Hashmaps match in a slightly unusual, but highly useful, way. Keywords on the ri
 ###### Other collections? (status: not yet decided)
 Do we want matches on sets? Would that even make sense? They're both unordered and un-keyed.
 
-Do we want matches on strcuts? Yes.
+Do we want matches on strcuts? Yes. (Not yet done.)
 
 #### Splats in expressions (status: not yet done)
 **See above for a discussion of tuple splats.**
