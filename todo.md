@@ -78,10 +78,9 @@ As of Apr 6, 2022.
 * [ ] LSP language server
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
-* [ ] improve strictness of `import`
+* [ ] improve `import`
 	- [ ] don't allow access further up than CWD (no `..`s in path?)
-* [ ] improve robustness of `import`
-	- [ ] how to allow `import` in cljs (not just clj)
+	- [ ] how to allow `import` in cljs (not just clj)?
 
 #### Core language prelude
 A language is more than syntax. Make some determinations about what needs to call out to the host language (Clojure; Zig?), and what can be implemented in Ludus.
