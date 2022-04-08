@@ -255,7 +255,11 @@ Lists match in similar ways to tuples. The difference is that they allow matchin
 ```
 let [] = []
 let [x] = [1] & x is 1
+let [x, y] = [1, 2] & x is 1; y is 2
+let [x] = [1, 2] & panic! no match; lengths must match
+& to match remaining members, use a splat
 let [head, ...tail] = [1, 2, 3, 4] & head is 1, tail is [2, 3, 4]
+let [head, ..] = [1, 2, 3, 4] & head is 1; .. is shorthand for ..._
 ```
 
 ###### Hashmaps (status: not yet done)
@@ -335,7 +339,7 @@ my_cool_number &=> 4
 sum &=> error! unbound name
 ```
 
-`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `let my_cool_number = do my_uncool_number |> add (_, 2) |> mult (_, 2) |> div (_, 3)`).
+`my_cool_number` will now be bound to `4`; `sum`, `product`, and `third` will not be bound below (or above) that block. (Note this contrived example would more concisely and idiomatically be written as a pipeline: `let my_cool_number = do my_uncool_number > add (_, 2) > mult (_, 2) > div (_, 3)`).
 
 Each block has access to any enclosing scope(s), up to the script level, and then to the prelude.
 
@@ -675,7 +679,7 @@ Note that in the `count_up` example, `increment_counter` is able to access `a_co
 
 #### Keywords and accessing hashmaps (status: mostly done)
 How do you get values out of hashmaps? The keys are keywords. There are two syntactical options, _functional keywords_ and _keyword accessors_:
-* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar |> :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords can be called anywhere, but don't raise panics when passed tuples of arities other than 1.)
+* Functional keywords. `:foo (bar)` evaluates to the value stored at `:foo` on `bar`. In all of the ways that matter, a keyword at the beginning of an expression can be treated like a function. This is useful in function pipelines or as an argument to a higher-order function, e.g., `do bar > :foo` is equivalent to the above, and `map(:foo, [bar, baz])` will create a new list with the values stored at `:foo` on each list member. (Status: keywords can be called anywhere, but don't raise panics when passed tuples of arities other than 1.)
 * Keyword accessors. Keywords that are _not_ at the beginning of an expression access the value at that keyword, and these can be chained: `foo :bar :baz` (or, without spaces, `foo:bar:baz`). This pulls `baz` off `bar`, which is itself pulled off `foo`. (Status: done.)
 
 In each case, accessing a key that is not defined in a hashmap returns `nil`. There will be function equivalents to key access which will raise errors with undefined key access. The equivalents to the previous examples: `get(bar, :foo)` gets `:foo` on `bar`; or `get(foo, [:bar, :baz])` gets `foo:bar:baz`.
@@ -776,10 +780,10 @@ Others that are possible are:
 
 #### Some nice-to-haves
 * Matching multiple clauses at once, as in Elixir's `with` construct (this is syntactic sugar for nested `match` expressions). (Status: superseded by a proposed `if`/`let`) pattern, in which any names bound in the test expression of an `if` are available in the `then` expression, and any errors dump you to the `else` expression (with no names bound).
-* Should there be a function composition/piping operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> do x |> f |> g |> h` is better than `let myfn = f | g | h` or `let myfn = h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. But: consider transducers, which we'll use extensively. Transducers want function composition.
+* Should there be a function composition/piping operator? My sense is that it's better to simply use the pipeline operator and be explicit rather than using pointfree anything. So: `fn myfn (x) -> do x > f > g > h` is better than `let myfn = f | g | h` or `let myfn = h . g . f`. Pointfree style is not, generally, idiomatic in Ludus. But: consider transducers, which we'll use extensively. Transducers want function composition.
   - F#, in addition to the pipeline operator, has forward and backward function composition: `f >> g >> h` and `h << g << f`, respectively. Since Ludus doesn't have `<` and `>` as comparison operators, it could simply use these, instead of the doubled ones.
-  - Consider the pipeline operator. F# and Elixir us `|>`.
-  - Ludus may want to have syntax sugar for binding its result type. Haskell uses `>>=`, but that's super obscure. I'm thinking `||>`. Alternately, we could use `>` as pipeline and `|>` as bind, using F#'s function composition operators.
+  - Consider the pipeline operator. F# and Elixir us `>`.
+  - Ludus may want to have syntax sugar for binding its result type. Haskell uses `>>=`, but that's super obscure. I'm thinking `|>`. Alternately, we could use `>` as pipeline and `>` as bind, using F#'s function composition operators.
   - Effectively, we need to get this right, but also, this is (or can be) ultimately sugar for `let myfn = comp ([h, g, f])`. So.
 * Generators & iterators (this could be syntactic sugar!, but will hopefully eventually be optimized), e.g. [not actually legal with new scoping rules]:
 ```
@@ -855,7 +859,7 @@ Generators may well be a later nice-to-have, but I suspect the protocol (dead si
 Following on the convention here of `(:value, x)`/`(:done, y)`, I am thinking about the conventions that ought to be baked into the language at a syntactic level. So, this is not about introducing a "protocol" construct. Following Elixir's lead, keywords and tuples (which can be usefully matched against) are great ways of doing this. So:
 
 * Iterator/generator tuples: `(:value, value)` and `(:done, value)`
-* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `||>` operator (prounounced bind?--see above on the pipeline operators), which is like `|>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`) Anyway, you could also have `unwrap_or`, which takes a default value instead of panicking. But: the short-circuiting of monadic bind is deeply useful. (Status: avoiding monads.)
+* Result types: `(:ok, result)` and `(:error, info)`. Perhaps the way to do this is to introduce a `=>` or `|>` operator (prounounced bind?--see above on the pipeline operators), which is like `>`, but automagically unpacks an `:ok` and short-circuits when an error is returned. Or an `expect` reserved word, like in Rust, where `expect (:ok, result)` evaluates to `result`, and `expect (:error, info)` panics, printing `info`. (But this could also just be a function, and if it can be just a function, make it just a function. But also, it should be called `expect!` or `unwrap!`) Anyway, you could also have `unwrap_or`, which takes a default value instead of panicking. But: the short-circuiting of monadic bind is deeply useful. (Status: avoiding monads.)
 * Maybe types are probably not actually necessary, and certainly not worth including syntactic sugar for. That said, probably the bind operator should short-circuit on `nil` as well as an error result?
 * Stopping reduction is done by convention with a tuple: `(:stop, result)` stopes the reduction and returns the result.
 
