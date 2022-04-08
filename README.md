@@ -183,7 +183,7 @@ But the following is illegal:
 ```
 
 
-##### Partial application (status: not started)
+##### Partial application (status: complete)
 Ludus allows for partial application of functions by use of a placeholder: `add (1, _)` returns a function that adds 1 to whatever you give it. So: `add (1, _) (2) &=> 3`. You may only use one placeholder in a tuple applied to a function. As a consequence, all partially applied functions are unary.
 
 ##### Pipeline application (status: in design)
