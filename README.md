@@ -470,7 +470,7 @@ Best practice is to use `else` or `_` for default cases in both `cond` and `matc
 * Allowing multiple patterns in the LHS of a match clause?, e.g. `0 | 1 -> ... & matches on 0 or 1`. _Temporary answer: this is desirable, I think, but for a later iteration._
 
 #### Functions
-Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntaxes. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
+Ludus is a deeply functional language. Functions are first-class values. They also have a few different syntactical forms. All are introduced with the reserved word, `fn`. Functions have a deep affinity with `match`, using an identical clause syntax, with one additional restriction: the left-hand side _must_ be a tuple pattern.
 
 ##### Anonymous functions (status: done)
 Anonymous functions are the syntactically simplest form, and can be used inline as arguments to higher-order functions. They consist of the reserved word, `fn`, and then a function clause. A stub and examples:
