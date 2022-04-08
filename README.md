@@ -524,6 +524,8 @@ fn inc {
 }
 ```
 
+(Design query: Perhaps instead of a special comment, a docstring is just a string?)
+
 In addition, note that the multiple clauses are pattern-matched in precisely the same way as `match` expressions. This has a few consequences:
 * If there is no match between the passed argument tuple and the clauses in the function body, an error will be raised.
 * A function can have different behaviour not only based on the number of arguments, but also on the literal values in patterns.
@@ -547,19 +549,17 @@ fn fib {
   &&& Returns the nth Fibonacci number.
   (0) -> 1
   (1) -> 1
-  (n) -> add (fib (sub (n, 1)), fib (sub (n, 2)))
+  (n) -> add (
+    fib (sub (n, 1)) 
+    fib (sub (n, 2)))
 }
 
 fn add {
   &&& Adds numbers together.
   () -> 0
-  (x) -> x
+  (x as List) -> reduce (add, x)
+  (x as Number) -> x
   (x, y) -> {...native code...}
-  & NB: this example may be obsolete (see notes on tuple splats)
-  (x, y, ...more) -> {
-    let sum = add (x, y)
-    add (sum, ...more)
-  }
 }
 ```
 
