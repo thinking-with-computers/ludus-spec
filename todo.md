@@ -28,7 +28,7 @@ As of Apr 6, 2022.
 * [x] `cond` expressions
 * [ ] add location information to panics
 * [ ] `import` expressions
-* [ ] `ns` expressions (structs + names?)
+* [x] `ns` expressions (structs + names?)
 * [ ] wire up a pretty-printer for Ludus values
 * [x] parse error reporting
 	- [ ] with line numbers
@@ -45,7 +45,7 @@ As of Apr 6, 2022.
 	- [ ] list
 	- [ ] set?
 	- [ ] ignored words
-	- [ ] `else`
+	- [x] `else`
 	- [ ] `as` in patterns
 	- [ ] splats in patterns
 		* [ ] list
