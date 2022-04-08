@@ -597,7 +597,7 @@ To be fast (optimized!), recursion must be managed in a particular way: no recur
 fn sum {
   &&& Returns the sum of a list of numbers.
   ([]) -> 0
-  ([x]) -> sum (x, 0)
+  ([x]) -> add (x, 0)
   ([first, ...rest], n) -> {
     let running_total = add (first, n) & broken out for pedagogical purposes
     sum (rest, running_total) & sum appears only as leftmost call on last line
