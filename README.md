@@ -386,7 +386,7 @@ Thus:
 if let nil = optional
   then handle_nil ()
   else {
-    something_with_something ()
+    something_with_something (optional)
   }
 
 if let (:ok, result) = might_fail
