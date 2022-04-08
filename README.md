@@ -361,7 +361,7 @@ Ludus has three main control flow constructs, called "conditional forms": `if`, 
 ##### `if` (status: done)
 `if` comes with two additional reserved words, `then` and `else`. `if` is binary: it decides which expression to evaluate based on a condition expression. Note that `if` requires both a `then` branch and an `else` branch. (Because it's an expression, it must return something, and that something must be made explicit; no implicit `nil`s.) `if <test_expr> then <then_expr> else <else_expr>`. Note that any of these expressions may be a block, and not a single expression.
 
-Newlines may come after the various expressions, e.g.:
+Single newlines may come after the test and then expressions, e.g.:
 
 ```
 if condition
