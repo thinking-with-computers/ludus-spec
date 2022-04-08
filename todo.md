@@ -28,7 +28,7 @@ As of Apr 6, 2022.
 * [x] `cond` expressions
 * [ ] add location information to panics
 * [ ] `import` expressions
-	- [ ] add static validation to pahts
+	- [ ] add static validation to paths
 * [x] `ns` expressions (structs + names?)
 * [ ] wire up a pretty-printer for Ludus values
 * [x] parse error reporting
