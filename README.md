@@ -1,7 +1,7 @@
 # ludus-spec
 ## A draft specification for the Ludus language
 
-Last revised 20 March 2022.
+Last revised 8 April 2022.
 
 ### Overview
 Ludus is a contemporary translation of Logo. It draws heavily, also, from Lisps: Scheme and Clojure. As well as Elixir (which itself draws from Clojure, but has a more "modern" syntax). It is designed from the ground up to be as friendly as possible in syntax, error messages, and use. Its particular characteristics are:
