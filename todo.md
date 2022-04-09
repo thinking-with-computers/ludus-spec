@@ -27,7 +27,7 @@ As of Apr 6, 2022.
 ### Core language features
 * [x] `cond` expressions
 * [ ] add location information to panics
-* [ ] `import` expressions
+* [ ] `import` expressions (in progress)
 	- [ ] add static validation to paths
 * [x] `ns` expressions (structs + names?)
 * [ ] wire up a pretty-printer for Ludus values
