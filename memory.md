@@ -30,7 +30,7 @@ mut list = [list]
 
 The question here is whether these are references or values. And since we deal with even heap-allocated data as _values_, what we get is `hash` being `#{:self #{:self mutable}}` and `list` being `[[]]`.
 
-There's the possibility of references, but those aren't yet in the langauge. You can model them with closures, however:
+There's the possibility of references, but those aren't yet in the language. You can model them with closures, however:
 
 ```
 fn ref (value) -> {
@@ -54,7 +54,7 @@ fn ref (value) -> {
 & circular falls out of reference now that the block is closed, but the ref count is now 1, and it won't get deleted
 
 
-& we can also have arbirarily complex circular references:
+& we can also have arbitrarily complex circular references:
 
 {
 	let indirect_1 = ref (nil)
@@ -103,7 +103,7 @@ One thing that I do know is that heap-allocated types will require that tuples, 
 
 I suspect that this will all take quite a while to figure out in all the details. One thought is that we'll end up wasting a bunch of memory by setting the alignment of the stack at 64 bits (with tuples and structs and closures taking up the number of members + 1).
 
-We don't need the kind of performance Roc is after (although I wouldn't be mad if we got there!), but it would be nice to use Ludus's user-facing strengths to make it a faster language when we get to the fast implementaiton phase; and, while we're still hammering out the semantics, it makes sense to be able to anticipate the performance concerns now (even if we make some decisions that depart from the perf happy path).
+We don't need the kind of performance Roc is after (although I wouldn't be mad if we got there!), but it would be nice to use Ludus's user-facing strengths to make it a faster language when we get to the fast implementation phase; and, while we're still hammering out the semantics, it makes sense to be able to anticipate the performance concerns now (even if we make some decisions that depart from the perf happy path).
 
 ##### Some further thoughts
 We need an additional restriction to get out of reference cycles: `ref`s cannot hold other `ref`s, nor may they hold _functions_. That is to say, a reference may only hold entities Ludus understands as values. And since Ludus treats all its collections as values, such collections cannot hold references. (Is that right? That is 100% _not_ what Clojure does. But it's perfectly happy to use Java's [tracing, heavily optimized beyond my ken] GC.)
@@ -129,3 +129,8 @@ Consider the following:
 ```
 
 This follows my rules, above. I think there's no way to avoid the mark-and-sweep garbage collection with these language semantics.
+
+::sigh:: Oh, well.
+
+#### STM
+
