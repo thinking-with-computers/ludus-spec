@@ -111,7 +111,7 @@ We need an additional restriction to get out of reference cycles: `ref`s cannot 
 I think this actually gets us to no reference cycles and ref counting.
 
 ##### Another set of thoughts
-Consider the following:
+I was wrong. Consider the following:
 
 ```
 {
@@ -133,4 +133,28 @@ This follows my rules, above. I think there's no way to avoid the mark-and-sweep
 ::sigh:: Oh, well.
 
 #### STM
+One difference between `var`s and `ref`s is that `ref`s implement STM. `swap!` takes a `ref` and a function. Here's what happens conceptually:
 
+```
+fn swap! (r, f) -> {
+	let t0 = deref (r)
+
+	let new_falue = f (t0)
+
+	let lock = r :lock () & pretend
+
+	if eq (t0, deref (r))
+		then {
+			lock :mut (new_value)
+			lock :free ()
+		}
+		else {
+			lock :free () & more pretend
+			swap! (r, f)
+		}
+
+	new_value
+}
+```
+
+We've got some pretend things here, since these won't be expressible in Ludus (getting or freeing locks, directly altering the value of a ref). But the idea is that we take 
