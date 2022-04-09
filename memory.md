@@ -81,7 +81,7 @@ The basic idea is to use the stack as much as possible: we don't need reference 
 
 On the stack:
 * `nil`, `true`, and `false`
-* numbers (32-bit floating point)
+* numbers (64-bit floating point)
 * tuples
 * structs (?)
 * closures (they have a static size known at compile time, and, as of _now_, are immutable; thank you Roc... maybe?)
