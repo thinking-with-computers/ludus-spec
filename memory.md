@@ -110,3 +110,22 @@ We need an additional restriction to get out of reference cycles: `ref`s cannot 
 
 I think this actually gets us to no reference cycles and ref counting.
 
+##### Another set of thoughts
+Consider the following:
+
+```
+{
+	ref myref = nil & myref count = 1
+
+	fn close_over () -> deref (myref) & myref count = 2
+
+	let myhash = #{:circular close_over} & myhash count = 1
+
+	swap! (myref, (_) -> myhash) & myref and myhash now have coount of 2
+} & count for both is now = 1
+
+& myref is now out of scope, unreachable, and has a ref count of 1
+& myhash is now out of scope, unreachable, and has a ref count of 1
+```
+
+This follows my rules, above. I think there's no way to avoid the mark-and-sweep garbage collection with these language semantics.
