@@ -28,7 +28,7 @@ Yihui Xie, in that blog post, points out that R's notebooks are basically just m
 
 So imagine, if you will, the following:
 * .ld, for Ludus scripts that are nothing but scripts;
-* .ldd, for Ludus data: an equivalent of JSON or EDN, which consists of nothing but Ludus literals (i.e. static data, no arrows), and
+* .ldd, for Ludus data: an equivalent of JSON or EDN, which consists of nothing but Ludus literals (i.e. static data, no arrows, no conditionals), and
 * .ldn, for Ludus notebook: a markdown document where the code blocks are interpreted as Ludus, syntax-highlighted that way. They're plain-text documents (unlike Jupyter notebooks, but like R notebooks).
 
 More to the point, it seems plausible to hook into the VSCode language server/plugin ecosystem to make the editing of .ld and .ldn files richly interactive. For example, each block in a Ludus notebook would automagically display its return value. We'd want something like Quokka, or Clojure Sublimed: a "REPL" in the editor, not an actual REPL. (The model would be not so different than Clojure Sublimed or a Jupyter notebook: a server running a Ludus interpreter that would communicate with the editor, and an editor plugin to manage that situation on the editor side.)
