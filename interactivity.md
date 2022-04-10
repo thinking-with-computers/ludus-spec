@@ -41,4 +41,4 @@ And so, the question, I reckon, is going to be: what's the thing we can fork tha
 
 My intuition is that, ultimately, it's going to live in VSCode.
 
-For now, however, learning the lessons of Niko Matsakis's "Responsive Compilers" video seems wise (https://www.youtube.com/watch?v=N6b44kMS6OM). Knowing how the LSP works before I start really digging into writing the interpreter à la Nystrom will be saluatary, I reckon.
+For now, however, learning the lessons of Niko Matsakis's "Responsive Compilers" video seems wise (https://www.youtube.com/watch?v=N6b44kMS6OM). Knowing how the LSP works before I start really digging into writing the interpreter à la Nystrom will be salutary, I reckon.
