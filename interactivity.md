@@ -37,7 +37,7 @@ However, a code editor is not exactly what we might want, either: no inline imag
 
 And here, we're reinventing a coding environment, or more to the point, a _computing_ environment. That may seem desirable, but not something I want to spend my days doing. Writing an interpreter is more than enough getting my hands dirty with hacking. 
 
-And so, the question, I reckon, is going to be: what's the thing we can fork that will give us the version of 		the thing that's closest to what we want? (And also, that will not require bootstrapping a whole coding environment on a local machine.)
+And so, the question, I reckon, is going to be: what's the thing we can fork that will give us the version of the thing that's closest to what we want? (And also, that will not require bootstrapping a whole coding environment on a local machine.)
 
 My intuition is that, ultimately, it's going to live in VSCode.
 
