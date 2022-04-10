@@ -157,4 +157,4 @@ fn swap! (r, f) -> {
 }
 ```
 
-We've got some pretend things here, since these won't be expressible in Ludus (getting or freeing locks, directly altering the value of a ref). But the idea is that we take 
+We've got some pretend things here, since these won't be expressible in Ludus (getting or freeing locks, directly altering the value of a ref). But the idea is that whatever you do with `swap!` gets re-attempted until it gets a clean
