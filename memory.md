@@ -145,11 +145,11 @@ fn swap! (r, f) -> {
 
 	if eq (t0, deref (r))
 		then {
-			lock :mut (new_value)
-			lock :free ()
+			lock :mut (new_value) & pretend, still
+			lock :free () & more pretend
 		}
 		else {
-			lock :free () & more pretend
+			lock :free () 
 			swap! (r, f)
 		}
 
