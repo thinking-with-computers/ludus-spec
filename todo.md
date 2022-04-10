@@ -27,6 +27,7 @@ As of Apr 6, 2022.
 ### Core language features
 * [x] `cond` expressions
 * [ ] add location information to panics
+	- [ ] add location information to AST nodes
 * [ ] `import` expressions (in progress)
 	- [ ] add static validation to paths
 * [x] `ns` expressions (structs + names?)
