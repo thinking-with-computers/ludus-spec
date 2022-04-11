@@ -73,8 +73,8 @@ As of Apr 6, 2022.
 * [ ] string interpolation w/ names only
 * [ ] tail call optimization
 * [ ] design/develop a framework for static analysis
-* [ ] syntax highlighting
-	- [ ] SublimeText (this first, it's much easier)
+* [ ] syntax highlighting (this first, this is much easier than a full language server)
+	- [ ] SublimeText
 	- [ ] VSCode
 * [ ] LSP language server
 * [ ] `when` clauses in patterns
