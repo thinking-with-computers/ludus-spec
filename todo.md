@@ -28,10 +28,10 @@ As of Apr 6, 2022.
 * [x] `cond` expressions
 * [ ] add location information to panics
 	- [ ] add location information to AST nodes
-* [ ] `import` expressions (in progress)
+* [x] `import` expressions
 	- [ ] add static validation to paths
 * [x] `ns` expressions (structs + names?)
-* [ ] wire up a pretty-printer for Ludus values
+* [x] up a pretty-printer for Ludus values
 * [x] parse error reporting
 	- [ ] with line numbers
 	- [ ] with nice text
@@ -63,7 +63,7 @@ As of Apr 6, 2022.
 * [ ] `if let` scoping/errors
 
 ### Core language design features
-* [ ] should numbers be a single type or two?
+* [ ] should numbers be a single type or two? (floats, or floats + ints)
 * [ ] should sets look like lists instead of hashes?
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
 * [ ] should `ref` swapping be a keyword or a function?
@@ -91,7 +91,7 @@ A language is more than syntax. Make some determinations about what needs to cal
 * [ ] no unbound names
 * [ ] no re-binding of names
 * [ ] `recur` is in tail position in `loop`
-* [ ] propery function arity
+* [ ] proper function arity
 * [ ] no invalid namespace access
 * [ ] detect some illegal struct field access
 * [ ] enforce `when` clause function restrictions
