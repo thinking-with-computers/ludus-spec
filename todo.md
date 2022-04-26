@@ -68,6 +68,7 @@ As of Apr 25, 2022.
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
 * [ ] should `ref` swapping be a keyword or a function?
 * [ ] what is the pipeline operator?
+* [ ] is a unary placeholder allowed?, e.g., `foo (_)` or `:foo (_)`
 
 ### Core language improvements
 * [ ] string interpolation w/ names only
