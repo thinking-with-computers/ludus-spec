@@ -132,6 +132,13 @@ This follows my rules, above. I think there's no way to avoid the mark-and-sweep
 
 ::sigh:: Oh, well.
 
+##### Yet another set of thoughts
+The example above can, perhaps, be fixed with a less naive strategy. Instead of doing the thing where you calculate a ref count line by line, you can count it block by block. The interpreter can easily tell if the return value gets bound. If it doesn't, no need to touch any ref counts at all! If it does, then you can effectively follow the reference graph and increment reference counts as you move things from the stack to the heap.
+
+This is a bit premature, but the idea is to start with a simple reference counting situation and then decide how to make it more sophisticated once we actually get to real use.
+
+Finally, one thing I think is worth noting is that dealing with cycles may just also be a thing we don't worry about. Memory leaks, shmemory leaks!
+
 #### STM
 One difference between `var`s and `ref`s is that `ref`s implement STM. `swap!` takes a `ref` and a function. Here's what happens conceptually:
 
