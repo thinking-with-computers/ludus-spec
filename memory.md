@@ -121,7 +121,7 @@ I was wrong. Consider the following:
 
 	let myhash = #{:circular close_over} & myhash count = 1
 
-	swap! (myref, (_) -> myhash) & myref and myhash now have coount of 2
+	swap! (myref, (_) -> myhash) & myref and myhash now have count of 2
 } & count for both is now = 1
 
 & myref is now out of scope, unreachable, and has a ref count of 1
@@ -139,7 +139,7 @@ One difference between `var`s and `ref`s is that `ref`s implement STM. `swap!` t
 fn swap! (r, f) -> {
 	let t0 = deref (r)
 
-	let new_falue = f (t0)
+	let new_value = f (t0)
 
 	let lock = r :lock () & pretend
 
@@ -147,13 +147,12 @@ fn swap! (r, f) -> {
 		then {
 			lock :mut (new_value) & pretend, still
 			lock :free () & more pretend
+			new_value
 		}
 		else {
 			lock :free () 
 			swap! (r, f)
 		}
-
-	new_value
 }
 ```
 
