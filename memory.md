@@ -137,7 +137,7 @@ The example above can, perhaps, be fixed with a less naive strategy. Instead of 
 
 This is a bit premature, but the idea is to start with a simple reference counting situation and then decide how to make it more sophisticated once we actually get to real use.
 
-Finally, one thing I think is worth noting is that dealing with cycles may just also be a thing we don't worry about. Memory leaks, shmemory leaks!
+Finally, one thing I think is worth noting is that dealing with cycles may just also be a thing we don't worry about. Memory leaks, shmemory leaks! Idiomatic Ludus will be written in ways that cycles won't really be an issue. The real issue, I think, is going to be developing and teaching that idiomatic style.
 
 #### STM
 One difference between `var`s and `ref`s is that `ref`s implement STM. `swap!` takes a `ref` and a function. Here's what happens conceptually:
