@@ -110,6 +110,7 @@ See [my notes on concurrency](./concurrency.md). I reckon that the actor model i
 * [ ] base concurrency forms
 	- [ ] `spawn`: creates a new process/actor
 	- [ ] `send`/`to`: sends a message
+	- [ ] `self`: a reference to the current process/actor
 	- [ ] `receive`: blocks & receives messages
 	- [ ] `skip`?--for selective receive: sends a message back to the queue
 * [ ] rework `panic!`
