@@ -65,8 +65,9 @@ As of Apr 25, 2022.
 * [ ] should numbers be a single type or two? (floats, or floats + ints)
 * [ ] should sets look like lists instead of hashes?
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
-* [ ] should `ref` swapping be a keyword or a function?
+* [x] should `ref` swapping be a keyword or a function? => function
 * [ ] what is the pipeline operator?
+* [ ] do lookahead to avoid the `do` reserved word for pipelines
 * [ ] is a unary placeholder allowed?, e.g., `foo (_)` or `:foo (_)`
 
 ### Other core considerations (not quite language-level)
@@ -101,6 +102,17 @@ A language is more than syntax. Make some determinations about what needs to cal
 
 ### Language additions/extensions
 These may or may not land in Ludus, and aren't necessary to start playing around with Ludus.
+
+#### Concurrency & actors
+See [my notes on concurrency](./concurrency.md). I reckon that the actor model is more powerful and in many ways not very much more complicated to implement (if we're not looking for OTP-level performance & resilience) than an event-loop based model--even in a single-threaded environment like the browser.
+
+* [ ] improve process model
+* [ ] base concurrency forms
+	- [ ] `spawn`: creates a new process/actor
+	- [ ] `send`/`to`: sends a message
+	- [ ] `receive`: blocks & receives messages
+	- [ ] `skip`?--for selective receive: sends a message back to the queue
+* [ ] rework `panic!`
 
 #### Datatypes + polymorphism
 One possibility with Ludus is to develop a set of extensions to the core language that will enable additional kinds of strictness, as well as more ergonomic use of the language.
