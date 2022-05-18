@@ -115,6 +115,10 @@ See [my notes on concurrency](./concurrency.md). I reckon that the actor model i
 	- [ ] `skip`?--for selective receive: sends a message back to the queue
 * [ ] rework `panic!`
 
+Blockers for this: tail call optimization.
+
+Nice-to-haves: multi-threading support.
+
 #### Datatypes + polymorphism
 One possibility with Ludus is to develop a set of extensions to the core language that will enable additional kinds of strictness, as well as more ergonomic use of the language.
 
