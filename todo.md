@@ -69,6 +69,9 @@ As of Apr 25, 2022.
 * [ ] what is the pipeline operator?
 * [ ] is a unary placeholder allowed?, e.g., `foo (_)` or `:foo (_)`
 
+### Other core considerations (not quite language)
+* [ ] Path semantics for `import`s
+
 ### Core language improvements
 * [ ] string interpolation w/ names only
 * [ ] tail call optimization
