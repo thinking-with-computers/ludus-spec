@@ -17,6 +17,10 @@ The actor model comes, approximately, from Erlang; I'm familiar with it from Eli
 
 One of the things about the actor model is that it's not only a form of concurrency (and, with immutable data structures, safe parallelism), it's also a method of managing state. (Which, ultimately, is what concurrency is really about anyway.)
 
+
+
+### An example of an actor
+
 In Elixir, you can write a very basic mutable data structure using an actor. From the [Elixir docs](https://elixir-lang.org/getting-started/processes.html#state)
 
 ```elixir
