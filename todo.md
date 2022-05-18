@@ -120,6 +120,8 @@ Blockers for this: tail call optimization.
 
 Nice-to-haves: multi-threading support.
 
+Design question: should these be reserved words or functions?, e.g. `send expr to PID`, or `send (PID, expr)`? (My impulse is to have this be built-in using reserved words, but I can't say why. I think because these don't really compose nicely with other functions.)
+
 #### Datatypes + polymorphism
 One possibility with Ludus is to develop a set of extensions to the core language that will enable additional kinds of strictness, as well as more ergonomic use of the language.
 
