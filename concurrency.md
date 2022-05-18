@@ -15,13 +15,13 @@ That suggests the actor model.
 
 The actor model comes, approximately, from Erlang; I'm familiar with it from Elixir. (This keeps my inspirations--Logo; Clojure; Elixir--coherent.) An actor (called a process in Erlang/Elixir world) gets its own execution/interpretation context: a call stack and a message queue. It can respond to messages from the outside world, and send messages back out to the outside world. Message passing is, to a first approximation, always asynchronous.
 
-One of the things about the actor model is that it's not only a form of concurrency (and, with immutable data structures, safe parallelism), it's also a method of managing state. (Which, ultimately, is what concurrency is really about anyway.)
+One of the things about the actor model is that it's not only a form of concurrency (and, with immutable data structures, safe parallelism), it's also a method of managing state. Which, ultimately, is what concurrency is really about anyway: how do you manage state when many things are happening at once?
 
-
+It adds a few orthogonal constructs to the language: the idea of a process, a way to send messages, and a way of ceding the execution of a process to a scheduler.
 
 ### An example of an actor
 
-In Elixir, you can write a very basic mutable data structure using an actor. From the [Elixir docs](https://elixir-lang.org/getting-started/processes.html#state)
+In Elixir, you can write a very basic mutable data structure using an actor. From the [Elixir docs](https://elixir-lang.org/getting-started/processes.html#state):
 
 ```elixir
 defmodule KV do
@@ -54,6 +54,8 @@ fn loop (hash) -> match receive with {
 	(:put, key, value) -> loop (assoc (hash, key, value))
 }
 
+& and now, for some use
+
 let kv = start () & kv is now some process ID
 
 send (:put, :hello, "world") to kv &=> (:put, :hello, "world")
@@ -68,7 +70,7 @@ In place of a ref here, interestingly, we get an immutable hashmap, passed as an
 
 There are several special forms/reserved words here. `spawn` creates a new actor in its own separate process, returning its process ID. `receive` blocks until there's a message in the message queue. Note that `loop` is recursive; the idea here is that the expression to match here, `receive`, is blocking. This process is suspended, awaiting a message. `send` is a non-blocking (asynchronous) message to an actor. `self` is a reserved word that resolves to the current process.
 
-Note that `send` is non-blocking; `receive` is blocking. The former, because it is non-blocking, is not a suspend point: the code keeps humming along. The latter is where the actor cedes its execution to the scheduler. (There may well be other "blocking" keywords, like `sleep` or `suspend`.) From these concurrency forms, we can get really complex behaviour.
+Note that `send` is non-blocking; `receive` is blocking. The former, because it is non-blocking, is not a suspend point: the code keeps humming along. The latter is where the actor cedes its execution to the scheduler. (There may well be other "blocking" keywords, like `sleep` or `suspend`--although I can imagine a way of implementing these in terms of `spawn`, `send`, `self`, and `receive`.) From these concurrency forms, we can get really complex behaviour.
 
 (NB: to use this specific sort of recursion, you need tail-call optimization; if we don't have that, you can use `loop`/`recur`.)
 
