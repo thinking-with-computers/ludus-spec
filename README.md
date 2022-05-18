@@ -743,7 +743,9 @@ All equality in Ludus is value-equality--with one exception. Functions are refer
 #### Events and asynchronicity
 **Status: This section needs much more research.**
 
-Asynchronicity is hard no matter how you do it. But the single-threaded JavaScript event loop is likely a good model. (Also, look to inspiration from Pyret.) I believe it's easy enough to implement with a single reserved word, `defer <expr>`, which bumps a computation to the next tick, and perhaps `wait <time> <expr>`.
+~~Asynchronicity is hard no matter how you do it. But the single-threaded JavaScript event loop is likely a good model. (Also, look to inspiration from Pyret.) I believe it's easy enough to implement with a single reserved word, `defer <expr>`, which bumps a computation to the next tick, and perhaps `wait <time> <expr>`.~~
+
+This is superseded by [the actor model](./concurrency.md).
 
 #### Errors (status: in progress)
 **This section is uneven.** 
