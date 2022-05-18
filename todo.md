@@ -51,6 +51,7 @@ As of May 18, 2022.
 	- [ ] splats in patterns
 		* [ ] list
 		* [ ] hashmap
+	- [ ] "pin" operator
 * [ ] iteration expressions
 	- [ ] `loop`
 	- [ ] `repeat`
