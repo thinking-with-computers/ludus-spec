@@ -36,7 +36,7 @@ As of Apr 25, 2022.
 	- [ ] with line numbers
 	- [ ] with nice text
 * [x] wire up Ludus CLI
-* [ ] `ref`s
+* [x] `ref`s
 * [x] function pipelines / `do` expressions
 * [x] partial function application
 	- [ ] fix bug: partial application of called keywords, e.g. `:foo (_)`. Right now it always returns `nil`, but it should be something else.
