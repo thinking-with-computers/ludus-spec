@@ -847,7 +847,7 @@ fn range with {
   (start as Number, end as Number) -> range (start, end, 1) 
   (start as Number 
     end as Number 
-    step as Number) -> gen (start) (current) -> {
+    step as Number) -> gen (start) with (current) -> {
       yield current
       if gte (current, end)
         then nil
