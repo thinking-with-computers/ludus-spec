@@ -50,7 +50,7 @@ As of May 18, 2022.
 		* [ ] list
 		* [ ] hashmap
 	- [ ] "pin" operator (`^` in Elixir, likely `*` in Ludus)
-* [ ] iteration expressions
+* [-] iteration expressions
 	- [x] `loop`
 	- [ ] `repeat`
 	- [ ] `gen`?
