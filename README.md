@@ -98,9 +98,9 @@ Tuple literals are also how Ludus represents arguments for function application.
 (In fact, function application is a special kind of general pattern matching.)
 
 ###### Resolved design decision: Tuples, splats, variadic functions, and the stack
-Tuples cannot be splatted into. This means that every tuple has a statically known length at compile time. And that also means that every function call has an explicit arity at compile time. Moreoever, while there is an (easy, often-used) way to write variadic functions, every function has a collection of explicit, statically-known arities at compile time. This means we can catch "wrong number of arguments" errors at compile time. It means we can optimize pattern matching. And it also means that tuples, when we get to a VM, can be stored on the stack rather than on the heap (making them fast!).
+Tuples cannot be splatted into. This means that every tuple has a statically known length at compile time. And that also means that every function call has an explicit arity at compile time. Moreover, while there is an (easy, often-used) way to write variadic functions, every function has a collection of explicit, statically-known arities at compile time. This means we can catch "wrong number of arguments" errors at compile time. It means we can optimize pattern matching. And it also means that tuples, when we get to a VM, can be stored on the stack rather than on the heap (making them fast!).
 
-It's worth tracing the design space here, because the three langauges that are sources of inspiration here do things differently:
+It's worth tracing the design space here, because the three languages that are sources of inspiration here do things differently:
 
 Logo is the weirdest among these. Logo has no variadic functions; every function has a known arity. In addition, because Logo was set on getting rid of Lisp's parentheses for kids, function calls don't have parentheses: they're just lists of arguments separated by spaces after a function, e.g. `FLOWER 100 50`. But that means the _parser_ has to know the arities of functions to decide what arguments belong to which function call. Among other decisions, this is one that makes Logo extremely weird compared to modern languages. Since the target audience of Ludus isn't young kids, and because there's a widely-culturally-known convention of code to use parentheses for function calls, we don't want to do this.
 
@@ -164,7 +164,7 @@ Newlines separate items, as with other collections, but both the keyword and the
 
 ```
 
-###### Hashmap syntatic sugaring (status: done)
+###### Hashmap syntactic sugaring (status: done)
 There will be some level of syntactic sugar for dealing with hashmaps. Possibilities include:
 * Bound name shorthands (yes): If a name is bound, you can simply write the name and store its value at the symbol corresponding to the name, e.g.: `foo = 42; #{foo} &=> #{:foo 42}`. _This is definite, see also hashmap pattern matching for the inverse of this._
 * Colon placement (no): the colon can go after the symbol, giving a syntax substantially similar to JS: `#{foo: 42, bar: 23}`. This may or may not be more intuitive to newbie coders, but it will be more readable to anybody with experience in another language. _This is a maybe nice-to-have._
