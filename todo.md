@@ -66,7 +66,7 @@ As of May 18, 2022.
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
 * [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
 
-### Improvements
+### Code improvements
 * [ ] Refactor parser to be less of a goddamn mess
 
 ### Core language design features
