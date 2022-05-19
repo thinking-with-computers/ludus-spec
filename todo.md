@@ -39,7 +39,6 @@ As of May 18, 2022.
 * [x] `ref`s
 * [x] function pipelines / `do` expressions
 * [x] partial function application
-	- [ ] fix bug: partial application of called keywords, e.g. `:foo (_)`. Right now it always returns `nil`, but it should be something else. (Decide what that something else should be.)
 * [ ] additional patterns
 	- [ ] hashmap
 	- [ ] struct
@@ -63,8 +62,12 @@ As of May 18, 2022.
 * [ ] `if let` scoping/errors
 
 ### Bugfixes
-* [ ] Fix script loading not in dir ludus is called from
+* [ ] Script loading not in dir ludus is called from
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
+* [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
+
+### Improvements
+* [ ] Refactor parser to be less of a goddamn mess
 
 ### Core language design features
 * [ ] should numbers be a single type or two? (floats, or floats + ints)
