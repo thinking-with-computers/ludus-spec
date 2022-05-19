@@ -49,7 +49,6 @@ As of May 19, 2022.
 	- [ ] splats in patterns
 		* [ ] list
 		* [ ] hashmap
-	
 * [-] iteration expressions
 	- [x] `loop`
 	- [ ] `repeat`
@@ -66,6 +65,7 @@ As of May 19, 2022.
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
 	- [x] for now, do my best to hide this behind `show`
 * [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
+* [ ] Add Ludus `show` for patterns
 
 ### Code improvements
 * [ ] Refactor parser to be less of a goddamn mess
