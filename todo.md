@@ -42,7 +42,6 @@ As of May 19, 2022.
 	- [ ] hashmap
 	- [ ] struct
 	- [x] list
-	- [ ] set?
 	- [x] ignored words
 	- [x] `else`
 	- [ ] `as` in patterns
