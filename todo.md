@@ -62,6 +62,10 @@ As of May 18, 2022.
 	- [ ] set
 * [ ] `if let` scoping/errors
 
+### Bugfixes
+* [ ] Fix script loading not in dir ludus is called from
+* [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
+
 ### Core language design features
 * [ ] should numbers be a single type or two? (floats, or floats + ints)
 * [ ] should sets look like lists instead of hashes?
