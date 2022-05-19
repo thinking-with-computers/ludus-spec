@@ -49,7 +49,7 @@ As of May 18, 2022.
 	- [ ] splats in patterns
 		* [ ] list
 		* [ ] hashmap
-	- [ ] "pin" operator (`^` in Elixir, likely `*` in Ludus)
+	
 * [-] iteration expressions
 	- [x] `loop`
 	- [ ] `repeat`
@@ -93,6 +93,7 @@ As of May 18, 2022.
 * [ ] `when` clauses in patterns
 	- [ ] which functions are allowed in `when` clauses?
 * [ ] `|` in match patterns as "or" (e.g., `0 | 1 -> ...` will match zero or one)
+* [ ] "pin" operator (`^` in Elixir, likely `*` in Ludus)
 * [ ] improve `import`
 	- [ ] don't allow access further up than CWD (no `..`s in path?)
 	- [ ] how to allow `import` in cljs (not just clj)?
