@@ -59,6 +59,7 @@ As of May 18, 2022.
 	- [ ] list
 	- [ ] set
 * [ ] `if let` scoping/errors
+* [x] `panic!` as reserved word, not function-like
 
 ### Bugfixes
 * [ ] Script loading not in dir ludus is called from
