@@ -29,7 +29,6 @@ As of May 18, 2022.
 * [ ] add location information to panics
 	- [x] add location information to AST nodes
 * [x] `import` expressions
-	- [ ] add static validation to paths
 * [x] `ns` expressions (structs + names?)
 * [x] up a pretty-printer for Ludus values
 * [x] parse error reporting
@@ -108,6 +107,7 @@ A language is more than syntax. Make some determinations about what needs to cal
 * [ ] detect some illegal struct field access
 * [ ] enforce `when` clause function restrictions
 * [ ] static closures
+* [ ] add static validation to paths	
 
 ### Language additions/extensions
 These may or may not land in Ludus, and aren't necessary to start playing around with Ludus.
