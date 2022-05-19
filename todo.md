@@ -26,7 +26,7 @@ As of May 18, 2022.
 
 ### Core language features
 * [x] `cond` expressions
-* [ ] add location information to panics
+* [x] add location information to panics
 	- [x] add location information to AST nodes
 * [x] `import` expressions
 * [x] `ns` expressions (structs + names?)
@@ -64,6 +64,7 @@ As of May 18, 2022.
 ### Bugfixes
 * [ ] Script loading not in dir ludus is called from
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
+	- [x] for now, do my best to hide this behind `show`
 * [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
 
 ### Code improvements
