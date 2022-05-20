@@ -146,7 +146,7 @@ Taken together, we have three things that are useful:
 * [ ] datatypes
 	- [ ] bare (`data Unique`)
 	- [ ] with tuples (`data Tagged (value)`)
-	- [ ] with structs (`data Color {:red as Number; :green as Number; :blue as Number}`)
+	- [ ] with structs (`data Color @{:red as Number; :green as Number; :blue as Number}`)
 	- [ ] sum types/enums
 		* [ ] bare (`data Status { Loading; Loaded; Error }`)
 		* [ ] with tuples (`data Result { Ok (value) ; Error (info)`)
