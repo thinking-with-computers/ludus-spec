@@ -80,7 +80,7 @@ As of May 19, 2022.
 
 ### Other core considerations (not quite language-level)
 * [ ] Path semantics for `import`s
-* [ ] Cache `import`s
+
 
 ### Core language improvements
 * [ ] string interpolation w/ names only
@@ -97,6 +97,7 @@ As of May 19, 2022.
 * [ ] improve `import`
 	- [ ] don't allow access further up than CWD (no `..`s in path?)
 	- [ ] how to allow `import` in cljs (not just clj)?
+	- [ ] Cache `import`s
 
 #### Core language prelude
 A language is more than syntax. Make some determinations about what needs to call out to the host language (Clojure; Zig?), and what can be implemented in Ludus.
