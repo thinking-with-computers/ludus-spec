@@ -48,9 +48,9 @@ As of May 19, 2022.
 	- [ ] splats in patterns
 		* [ ] list
 		* [ ] hashmap
-* [-] iteration expressions
+* [ ] iteration expressions
 	- [x] `loop`
-	- [ ] `repeat` (this is sugar over `loop`, and presents syntactical problems)
+	- [ ] `repeat` (sugar over `loop`, and presents syntactical problems)
 	- [ ] `gen`? (this will be different semantically depending on actors)
 * [ ] splats for:
 	- [x] hashmap
