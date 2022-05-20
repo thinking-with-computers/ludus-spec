@@ -40,7 +40,7 @@ As of May 19, 2022.
 * [x] partial function application
 * [ ] additional patterns
 	- [x] hashmap
-	- [ ] struct
+	- [x] struct
 	- [x] list
 	- [x] ignored words
 	- [x] `else`
