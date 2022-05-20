@@ -127,7 +127,7 @@ See [my notes on concurrency](./concurrency.md). I reckon that the actor model i
 	- [ ] `receive`: blocks & receives messages
 	- [ ] `skip`?--for selective receive: sends a message back to the queue
 	- [ ] `exit`?--to close a process
-* [ ] rework `panic!`
+* [ ] rework `panic!` for processes
 
 Blockers for this: tail call optimization.
 
