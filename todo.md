@@ -39,7 +39,7 @@ As of May 19, 2022.
 * [x] function pipelines / `do` expressions
 * [x] partial function application
 * [ ] additional patterns
-	- [ ] hashmap
+	- [x] hashmap
 	- [ ] struct
 	- [x] list
 	- [x] ignored words
