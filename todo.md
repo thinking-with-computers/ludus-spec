@@ -1,6 +1,6 @@
 # What we're doing
 
-As of May 19, 2022.
+As of May 20, 2022.
 
 ### Things already done
 * Atomic values
