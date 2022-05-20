@@ -81,7 +81,6 @@ As of May 19, 2022.
 ### Other core considerations (not quite language-level)
 * [ ] Path semantics for `import`s
 
-
 ### Core language improvements
 * [ ] string interpolation w/ names only
 * [ ] tail call optimization
