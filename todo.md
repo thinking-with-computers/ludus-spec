@@ -74,7 +74,7 @@ As of May 19, 2022.
 * [ ] should sets look like lists instead of hashes?
 * [ ] how to spell builtin types? (before/without datatypes, e.g. `:string` or `String`)
 * [x] should `ref` swapping be a keyword or a function? => function
-* [ ] what is the pipeline operator?
+* [ ] what is the pipeline operator? (rn: `>`)
 * [ ] do lookahead to avoid the `do` reserved word for pipelines
 * [ ] is a unary placeholder allowed?, e.g., `foo (_)` or `:foo (_)`
 
