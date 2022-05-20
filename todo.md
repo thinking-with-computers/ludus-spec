@@ -54,7 +54,7 @@ As of May 19, 2022.
 	- [ ] `gen`? (this will be different semantically depending on actors)
 * [ ] splats for:
 	- [ ] hashmap
-	- [ ] list
+	- [x] list
 	- [ ] set
 * [ ] `if let` scoping/errors
 * [x] `panic!` as reserved word, not function-like
