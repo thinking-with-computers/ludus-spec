@@ -150,7 +150,7 @@ Taken together, we have three things that are useful:
 	- [ ] sum types/enums
 		* [ ] bare (`data Status { Loading; Loaded; Error }`)
 		* [ ] with tuples (`data Result { Ok (value) ; Error (info)`)
-		* [ ] with structs (...)
+		* [ ] with structs (`data Color { RGB @{:red, :green, :blue} ; CMYK @{:cyan, :magenta, :yellow, :black}`)
 * [ ] modules
 * [ ] methods
 	- [ ] design syntax (e.g., `::method`)
