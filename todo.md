@@ -50,8 +50,8 @@ As of May 19, 2022.
 		* [ ] hashmap
 * [-] iteration expressions
 	- [x] `loop`
-	- [ ] `repeat`
-	- [ ] `gen`?
+	- [ ] `repeat` (this is sugar over `loop`, and presents syntactical problems)
+	- [ ] `gen`? (this will be different semantically depending on actors)
 * [ ] splats for:
 	- [ ] hashmap
 	- [ ] list
