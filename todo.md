@@ -53,9 +53,9 @@ As of May 19, 2022.
 	- [ ] `repeat` (this is sugar over `loop`, and presents syntactical problems)
 	- [ ] `gen`? (this will be different semantically depending on actors)
 * [ ] splats for:
-	- [ ] hashmap
+	- [x] hashmap
 	- [x] list
-	- [ ] set
+	- [x] set
 * [ ] `if let` scoping/errors
 * [x] `panic!` as reserved word, not function-like
 
