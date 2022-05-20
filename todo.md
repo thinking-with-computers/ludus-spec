@@ -111,7 +111,7 @@ A language is more than syntax. Make some determinations about what needs to cal
 * [ ] detect some illegal struct field access
 * [ ] enforce `when` clause function restrictions
 * [ ] static closures
-* [ ] add static validation to paths
+* [ ] add static validation to `import` paths
 
 ### Language additions/extensions
 These may or may not land in Ludus, and aren't necessary to start playing around with Ludus.
