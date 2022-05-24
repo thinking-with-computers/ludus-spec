@@ -44,7 +44,7 @@ As of May 20, 2022.
 	- [x] list
 	- [x] ignored words
 	- [x] `else`
-	- [ ] `as` in patterns
+	- [ ] `as` in patterns (blocking: type system)
 	- [ ] splats in patterns
 		* [ ] list
 		* [ ] hashmap
