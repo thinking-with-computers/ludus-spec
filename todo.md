@@ -60,7 +60,7 @@ As of May 20, 2022.
 * [x] `panic!` as reserved word, not function-like
 
 ### Bugfixes
-* [ ] Script loading not in dir ludus is called from
+* [x] Script loading not in dir ludus is called from
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
 	- [x] for now, do my best to hide this behind `show`
 * [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
