@@ -52,7 +52,7 @@ As of May 20, 2022.
 	- [x] `loop`
 	- [ ] `repeat` (sugar over `loop`, and presents syntactical problems)
 	- [ ] `gen`? (this will be different semantically depending on actors)
-* [ ] splats for:
+* [x] splats for:
 	- [x] hashmap
 	- [x] list
 	- [x] set
