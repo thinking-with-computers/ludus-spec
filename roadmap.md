@@ -38,4 +38,7 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 	- [ ] execute
 
 ### Major projects
-Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but 
+Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but worked out *enough*. (What's enough?)
+
+#### REPL
+We have
