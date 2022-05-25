@@ -61,6 +61,7 @@ As of May 20, 2022.
 
 ### Bugfixes
 * [x] Script loading not in dir ludus is called from
+* [ ] Fail more gracefully when file not found (rather than gross Java stack trace)
 * [ ] Investigate `clj/pprint` dying on circular references (like in Ludus closures)
 	- [x] for now, do my best to hide this behind `show`
 * [ ] Partial application of called keywords, e.g. `:foo (_)` returns `nil`; it should be something else.
