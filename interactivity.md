@@ -46,7 +46,7 @@ For now, however, learning the lessons of Niko Matsakis's "Responsive Compilers"
 ### After a conversation with Matt
 On 2022-05-25.
 
-We can, and should indeed, use a REPL!
+We can, and should indeed, make and use a REPL!
 
 The idea is to have context switching built into the REPL, something akin to namespaces. But the idea is that you can manage REPL sessions with in-Ludus functions that cause panics in scripts.
 
@@ -71,6 +71,10 @@ session > repl :switch ("ludus")
 :ok
 ludus > foo
 23
-ludus > ...
+ludus > repl :current () :name
+"ludus"
 ```
 
+I think the R-style markdown notebook makes a lot of sense, and should absolutely be something we work towards. But very little beats a REPL for early hacking and distribution. Also, it can be the basis for a language server that has a built-in "REPL" in the editor later on.
+
+The API will take some doing to get right, and the REPL functions will need some special wiring up. But it should be reasonably straightforward.
