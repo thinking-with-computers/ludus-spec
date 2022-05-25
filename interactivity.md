@@ -42,3 +42,21 @@ And so, the question, I reckon, is going to be: what's the thing we can fork tha
 My intuition is that, ultimately, it's going to live in VSCode.
 
 For now, however, learning the lessons of Niko Matsakis's "Responsive Compilers" video seems wise (https://www.youtube.com/watch?v=N6b44kMS6OM). Knowing how the LSP works before I start really digging into writing the interpreter à la Nystrom will be salutary, I reckon.
+
+### After a conversation with Matt
+On 2022-05-25.
+
+We can, and should indeed, use a REPL!
+
+The idea is to have context switching built into the REPL, something akin to namespaces. But the idea is that you can manage REPL sessions with in-Ludus functions that cause panics in scripts.
+
+So, consider the following:
+```
+ludus > let foo = 42
+42
+ludus > let 23 = foo
+Panic! ...
+ludus > let foo = 23
+Panic! ...
+ludus > 
+```
