@@ -77,4 +77,4 @@ ludus > repl :current () :name
 
 I think the R-style markdown notebook makes a lot of sense, and should absolutely be something we work towards. But very little beats a REPL for early hacking and distribution. Also, it can be the basis for a language server that has a built-in "REPL" in the editor later on.
 
-The API will take some doing to get right, and the REPL functions will need some special wiring up. But it should be reasonably straightforward.
+The API will take some doing to get right, and the REPL functions will need some special wiring up. And the text input interface may be a bit titchy (when is a newline the end of an expression?). But it should be reasonably straightforward, all told.
