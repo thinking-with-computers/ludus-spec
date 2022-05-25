@@ -57,3 +57,17 @@ The strict immutability of Ludus brushes up against the interactivity of a REPL.
 	- [ ] If not already in place, research Clj CLI/TUI packages
 	- [ ] Syntax highlighting
 	- [ ] Colored output
+
+#### Datatypes
+
+#### Modules & methods
+
+#### Actors/processes
+
+#### Excellent error messages
+
+#### Static analysis
+
+#### Documentation
+
+#### Stdlib
