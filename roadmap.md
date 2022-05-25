@@ -40,7 +40,10 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 	- [ ] execute
 
 #### `when` guards
-* 
+* [ ] Add to pattern syntax
+* [ ] Add to pattern semantics
+* [ ] How to restrict guard expressions to pure functions?
+	- Elixir just has a list of acceptable functions.
 
 ### Major projects
 Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but worked out *enough*. (What's enough?)
