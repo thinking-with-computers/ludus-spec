@@ -60,7 +60,9 @@ The strict immutability of Ludus brushes up against the interactivity of a REPL.
 	- [ ] Colored output
 
 #### Datatypes
-Ludus will have datatypes.
+Ludus will have datatypes, including sum types (enums). This will allow for static checking of pattern match exhaustiveness.
+
+* [ ] Full design/spec (see [notes on datatypes](nses_structs_types.md))
 
 #### Modules & methods
 
