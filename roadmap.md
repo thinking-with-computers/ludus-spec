@@ -11,6 +11,8 @@ As of now, the major parts of Ludus are largely worked out.
 * Actors/processes
 * Error messages
 * Static analysis
+* Documentation
+* Stdlib
 
 ### Minor projects
 * Syntax highlighting
@@ -22,8 +24,8 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 	- [ ] List
 	- [ ] Dict
 	- [ ] Tuple? (Gather remaining members into a list? This would allow robustly variadic functions.)
-* [ ] `if`/`let` error handling: the test expression in an `if` will swallow 
-* [ ] Line number in error reporting is always `nil`
+* [ ] `if`/`let` coding pattern/error handling: the test expression in an `if` will swallow panics caused by failures to match, and dump out to the `else` branch.
+* [ ] Line number in error reporting is always `nil`: should, like, be the actual line number
 * [ ] Fail gracefully when files not found
 * [ ] Add pretty-printing for patterns
 
@@ -36,3 +38,4 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 	- [ ] execute
 
 ### Major projects
+Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but 
