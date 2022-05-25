@@ -20,6 +20,7 @@ As of now, the major parts of Ludus are largely worked out.
 
 #### Quality of life improvements
 Or, the rough edges that need to be sanded down, and bugfixes:
+* [ ] Rename hashmaps to dicts
 * [ ] Splats in patterns
 	- [ ] List
 	- [ ] Dict
@@ -59,6 +60,7 @@ The strict immutability of Ludus brushes up against the interactivity of a REPL.
 	- [ ] Colored output
 
 #### Datatypes
+Ludus will have datatypes.
 
 #### Modules & methods
 
