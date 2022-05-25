@@ -55,8 +55,22 @@ So, consider the following:
 ludus > let foo = 42
 42
 ludus > let 23 = foo
-Panic! ...
+Panic! Could not match 42 with 23
 ludus > let foo = 23
-Panic! ...
-ludus > 
+Panic! Name foo already bound to 42
+ludus > repl :flush ()
+:ok
+ludus > foo
+Panic! Unbound name foo
+ludus > let foo = 23
+23
+ludus > repl :new ("session")
+session > foo
+Panic! Unbound name foo
+session > repl :switch ("ludus")
+:ok
+ludus > foo
+23
+ludus > ...
 ```
+
