@@ -41,4 +41,11 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but worked out *enough*. (What's enough?)
 
 #### REPL
-We have
+The strict immutability of Ludus brushes up against the interactivity of a REPL. You can't re-bind names! But Matt gave us our model for dealing with this friction, at least to start: REPL sessions. See the end of my notes on [interactivity](interactivity.md).
+
+* [ ] Basic interactivity
+	- [ ] Clj read/write from stdio
+* [ ] Session management
+	- [ ] API design, e.g. `repl {:flush, :switch, :dump, :new, ...}`
+* [ ] Panic handling
+* [ ] 
