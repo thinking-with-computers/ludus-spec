@@ -17,6 +17,7 @@ As of now, the major parts of Ludus are largely worked out.
 ### Minor projects
 * Syntax highlighting
 * Quality of life improvements
+* `when` guards in patterns
 
 #### Quality of life improvements
 Or, the rough edges that need to be sanded down, and bugfixes:
@@ -37,6 +38,9 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 * [ ] VSCode
 	- [ ] research format
 	- [ ] execute
+
+#### `when` guards
+* 
 
 ### Major projects
 Executing on these is the path out of pre-alpha into alpha, and the prerequisite to asking others to engage in the language. Not necessarily completely worked out, but worked out *enough*. (What's enough?)
@@ -67,15 +71,36 @@ Ludus will have datatypes, including sum types (enums). This will allow for stat
 	- [ ] Syntactical representation
 	- [ ] Base types
 * [ ] Construction
+	- [ ] Nullary
+	- [ ] Tuple
+	- [ ] Struct
 * [ ] Pattern matching
+	- [ ] Add `as` to match expression
+	- [ ] Add patterns for constructed datatypes
 
 #### Modules & methods
+With datatypes, we have the possibility of robust single-dispatch polymorphism. This will affect the standard library substantially, making it substantially simpler and more interesting.
+
+* [ ] Full design/spec (more in [notes on datatypes](nses_structs_types.md))
+	- [ ] Module syntax
+		* [ ] How to handle repeated naming of module/type/namespace?
+	- [ ] Method syntax (proposal, `::method`)
+	- [ ] Dispatch semantics
+		* [ ] For base datatypes
+		* [ ] For constructed datatypes
 
 #### Actors/processes
+
 
 #### Excellent error messages
 
 #### Static analysis
+Static analysis of code is, like, a whole discipline.
+
+* [ ] Research basic techniques for static analysis
+	- [ ] Play with Ludus ASTs
+	- [ ] Read into the literature
+* [ ] Create a laundry list of 
 
 #### Documentation
 
