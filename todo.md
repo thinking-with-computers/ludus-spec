@@ -78,6 +78,7 @@ As of May 20, 2022.
 * [ ] what is the pipeline operator? (rn: `>`)
 * [ ] do lookahead to avoid the `do` reserved word for pipelines
 * [ ] is a unary placeholder allowed?, e.g., `foo (_)` or `:foo (_)`
+* [ ] maybe splats in tuple patterns
 
 ### Other core considerations (not quite language-level)
 * [ ] Path semantics for `import`s
