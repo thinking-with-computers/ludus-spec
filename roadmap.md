@@ -53,14 +53,14 @@ Executing on these is the path out of pre-alpha into alpha, and the prerequisite
 #### REPL
 The strict immutability of Ludus brushes up against the interactivity of a REPL. You can't re-bind names! But Matt gave us our model for dealing with this friction, at least to start: REPL sessions. See the end of my notes on [interactivity](interactivity.md).
 
-* [ ] Basic interactivity
-	- [ ] Clj read/write from stdio
+* [x] Basic interactivity
+	- [x] Clj read/write from stdio
 	- [ ] Research Clj CLI/TUI packages to help
 * [ ] Session management
-	- [ ] API design, e.g. `Repl {:flush, :switch, :dump, :new, ...}`
+	- [ ] API design, e.g. `repl {:flush, :switch, :dump, :new, ...}`
 	- [ ] Implementation
-	- [ ] Handle inclusion of `Repl` access in scripts
-* [ ] Panic handling
+	- [ ] Handle inclusion of `repl` access in scripts
+* [x] Panic handling
 * [ ] Multi-line expression management
 * [ ] Tab completion
 * [ ] Colors!
