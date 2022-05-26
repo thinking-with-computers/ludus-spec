@@ -111,7 +111,13 @@ For a start on the actor-model see [the Elixir documentation on processes](https
 #### Excellent error messages
 The sooner we surface errors, the better. Get those iteration loops tighter. This is an ever-receding goal.
 
-* [ ]
+* [ ] Design error-reporting *system* (in place of ad hoc SQA)
+* [ ] Ensure friendly Ludus textual representation of all Ludus elements
+	- [ ] Patterns
+* [ ] Improve information from panics
+	- [ ] Do we want stack traces?
+	- [ ] How do we get them with a tree-walk interpreter?
+* [ ] Show offending lines at the command line when error reporting
 
 #### Static analysis
 The sooner we surface errors, the better. Also, 
