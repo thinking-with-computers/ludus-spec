@@ -118,6 +118,7 @@ The sooner we surface errors, the better. Get those iteration loops tighter. Thi
 	- [ ] Do we want stack traces?
 	- [ ] How do we get them with a tree-walk interpreter?
 * [ ] Show offending lines at the command line when error reporting
+* [ ] ...with decoration showing offending *parts* of that line
 
 #### Static analysis
 The sooner we surface errors, the better. Also, 
