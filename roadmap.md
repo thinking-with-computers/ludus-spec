@@ -109,7 +109,9 @@ For a start on the actor-model see [the Elixir documentation on processes](https
 	- [ ] message passing
 
 #### Excellent error messages
+The sooner we surface errors, the better. Get those iteration loops tighter. This is an ever-receding goal.
 
+* [ ]
 
 #### Static analysis
 The sooner we surface errors, the better. Also, 
