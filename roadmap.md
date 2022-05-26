@@ -144,10 +144,10 @@ Documentation has to be discoverable and very available and accessible to learne
 * [ ] Add docstrings to the language
 * [ ] Write docstrings for the stdlib
 * [ ] Automated documentation generation
+* [ ] Generate & host documentation
 * [ ] `doc` function at REPL
 * [ ] Introductory guides
 	- [ ] For learners
 	- [ ] For existing programmers
-* [ ] 
 
 #### Stdlib
