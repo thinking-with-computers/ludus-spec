@@ -23,7 +23,7 @@ As of now, the major parts of Ludus are largely worked out.
 
 #### Quality of life improvements
 Or, the rough edges that need to be sanded down, and bugfixes:
-* [ ] Rename hashmaps to dicts
+* [x] Rename hashmaps to dicts
 * [ ] Splats in patterns
 	- [ ] List
 	- [ ] Dict
