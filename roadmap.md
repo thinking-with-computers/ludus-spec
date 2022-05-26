@@ -151,3 +151,4 @@ Documentation has to be discoverable and very available and accessible to learne
 	- [ ] For existing programmers
 
 #### Stdlib
+A programming language is not just its syntax and semantics, but also its standard library. This is far enough out that I don't have tickboxes for this, but it should be rich and straightforward for the kinds of activities we want learners to accomplish. ALso, as much of this should be written in Ludus as possible, for to allow it to run on a faster interpreter later on.
