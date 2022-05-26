@@ -13,6 +13,8 @@ As of now, the major parts of Ludus are largely worked out.
 * Static analysis
 * Documentation
 * Stdlib
+* `test` blocks
+* Testing
 
 ### Minor projects
 * Syntax highlighting
@@ -91,9 +93,19 @@ With datatypes, we have the possibility of robust single-dispatch polymorphism. 
 	- [ ] Dispatch semantics
 		* [ ] For base datatypes
 		* [ ] For constructed datatypes
+* [ ] Implementation
 
 #### Actors/processes
+For a start on the actor-model see [the Elixir documentation on processes](https://elixir-lang.org/getting-started/processes.html) (its name for actors).
 
+* [ ] Research how to model actor semantics in Clojure
+* [ ] 
+* [ ] Full design/spec
+	- [ ] Syntax
+		* [ ] Function-like or keyword-like? (e.g. `self ()` vs `self`, `receive` vs `receive ()`)
+* [ ] Implementation
+	- [ ] `spawn` w/o message passing (simple returning-function)
+	- [ ] message passing
 
 #### Excellent error messages
 
@@ -103,7 +115,16 @@ Static analysis of code is, like, a whole discipline.
 * [ ] Research basic techniques for static analysis
 	- [ ] Play with Ludus ASTs
 	- [ ] Read into the literature
-* [ ] Create a laundry list of 
+* [ ] Create a laundry list of wish-list static analysis items
+	- [ ] Tail-call elimination
+	- [ ] No use of unbound names
+	- [ ] No binding of unused names
+	- [ ] Exhaustive pattern-matching
+	- [ ] No improper ns member access
+	- [ ] `recur` is in tail position in `loop`
+	- [ ] enforce `when` guard restrictions
+	- [ ] static closures
+	- [ ] validation of `import` paths
 
 #### Documentation
 
