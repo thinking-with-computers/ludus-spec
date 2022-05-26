@@ -73,7 +73,7 @@ Ludus will have datatypes, including sum types (enums). This will allow for stat
 
 * [ ] Full design/spec (see [notes on datatypes](nses_structs_types.md))
 	- [ ] Internal representation
-	- [ ] Syntactical representation
+	- [ ] Syntactical representation (are capital letters enough?)
 	- [ ] Base types
 * [ ] Construction
 	- [ ] Nullary
@@ -96,10 +96,10 @@ With datatypes, we have the possibility of robust single-dispatch polymorphism. 
 * [ ] Implementation
 
 #### Actors/processes
-For a start on the actor-model see [the Elixir documentation on processes](https://elixir-lang.org/getting-started/processes.html) (its name for actors).
+For a start on the actor-model see [the Elixir documentation on processes](https://elixir-lang.org/getting-started/processes.html) (its name for actors). This is Ludus's message-passing concurrency model.
 
 * [ ] Research how to model actor semantics in Clojure
-* [ ] 
+* [ ] Implement tail-call elimination (see Static analysis, below)
 * [ ] Full design/spec
 	- [ ] Syntax
 		* [ ] Function-like or keyword-like? (e.g. `self ()` vs `self`, `receive` vs `receive ()`)
@@ -109,8 +109,9 @@ For a start on the actor-model see [the Elixir documentation on processes](https
 
 #### Excellent error messages
 
+
 #### Static analysis
-Static analysis of code is, like, a whole discipline.
+The sooner we surface errors, the better. Also, 
 
 * [ ] Research basic techniques for static analysis
 	- [ ] Play with Ludus ASTs
