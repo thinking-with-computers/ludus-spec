@@ -73,7 +73,8 @@ Ludus will have datatypes, including sum types (enums). This will allow for stat
 
 * [ ] Full design/spec (see [notes on datatypes](nses_structs_types.md))
 	- [ ] Internal representation
-	- [ ] Syntactical representation (are capital letters enough?)
+	- [ ] Syntactical representation
+		* Are capital letters enough?
 	- [ ] Base types
 * [ ] Construction
 	- [ ] Nullary
