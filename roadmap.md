@@ -29,7 +29,7 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 	- [ ] Dict
 	- [ ] Tuple? (Gather remaining members into a list? This would allow robustly variadic functions.)
 * [ ] `if`/`let` coding pattern/error handling: the test expression in an `if` will swallow panics caused by failures to match, and dump out to the `else` branch.
-* [ ] Line number in error reporting is always `nil`: should, like, be the actual line number
+* [x] Line number in error reporting is always `nil`: should, like, be the actual line number
 * [ ] Fail gracefully when files not found
 * [ ] Add pretty-printing for patterns
 
