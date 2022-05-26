@@ -138,5 +138,16 @@ The sooner we surface errors, the better. Also,
 	- [ ] validation of `import` paths
 
 #### Documentation
+Documentation has to be discoverable and very available and accessible to learners as well as programmers.
+
+* [ ] Formal specification of Ludus
+* [ ] Add docstrings to the language
+* [ ] Write docstrings for the stdlib
+* [ ] Automated documentation generation
+* [ ] `doc` function at REPL
+* [ ] Introductory guides
+	- [ ] For learners
+	- [ ] For existing programmers
+* [ ] 
 
 #### Stdlib
