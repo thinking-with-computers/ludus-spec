@@ -56,10 +56,10 @@ The strict immutability of Ludus brushes up against the interactivity of a REPL.
 * [x] Basic interactivity
 	- [x] Clj read/write from stdio
 	- [ ] Research Clj CLI/TUI packages to help
-* [ ] Session management
+* [x] Session management
 	- [ ] API design, e.g. `repl {:flush, :switch, :dump, :new, ...}`
-	- [ ] Implementation
-	- [ ] Handle inclusion of `repl` access in scripts
+	- [x] Implementation
+	- [x] Handle inclusion of `repl` access in scripts
 * [x] Panic handling
 * [ ] Multi-line expression management
 * [ ] Tab completion
