@@ -107,6 +107,8 @@ For a start on the actor-model see [the Elixir documentation on processes](https
 * [x] Implementation
 	- [x] `spawn` w/o message passing (simple returning-function)
 	- [x] message passing
+* [ ] Bugfixes
+	- [ ] Repeated-spawn deadlocking
 
 #### Excellent error messages
 The sooner we surface errors, the better. Get those iteration loops tighter. This is an ever-receding goal.
