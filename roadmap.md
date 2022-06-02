@@ -99,14 +99,14 @@ With datatypes, we have the possibility of robust single-dispatch polymorphism. 
 #### Actors/processes
 For a start on the actor-model see [the Elixir documentation on processes](https://elixir-lang.org/getting-started/processes.html) (its name for actors). This is Ludus's message-passing concurrency model.
 
-* [ ] Research how to model actor semantics in Clojure
+* [x] Research how to model actor semantics in Clojure
 * [ ] Implement tail-call elimination (see Static analysis, below)
-* [ ] Full design/spec
-	- [ ] Syntax
-		* [ ] Function-like or keyword-like? (e.g. `self ()` vs `self`, `receive` vs `receive ()`)
-* [ ] Implementation
-	- [ ] `spawn` w/o message passing (simple returning-function)
-	- [ ] message passing
+* [x] Full design/spec
+	- [x] Syntax
+		* [x] Function-like or keyword-like? (e.g. `self ()` vs `self`, `receive` vs `receive ()`) (keyword-like)
+* [x] Implementation
+	- [x] `spawn` w/o message passing (simple returning-function)
+	- [x] message passing
 
 #### Excellent error messages
 The sooner we surface errors, the better. Get those iteration loops tighter. This is an ever-receding goal.
