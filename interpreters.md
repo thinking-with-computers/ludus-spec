@@ -17,4 +17,9 @@ But, this does nevertheless impact a set of factors I will need to be consider a
 
 (2) I think I've more or less worked out [memory management](./memory.md), at least at a very high level. But the actor model raises new questions. Each process in the BEAM has its own stack *and heap*, and messages that are passed between them must be serialized atomics. But Ludus is not looking for truly distributed computing, and the memory is largely read-only. So it should be possible to have a single reference-counted heap, and to pass reference types by reference instead of by value.
 
-(3) 
+(3) There will need to be opcodes for the VM that relate to the process model, including incrementing a reduction and also parking the process awaiting a message.
+
+(4) We're in the realm of empirical testing of scheduling algorithms, and I can tell that's already going to give me heartburn. Keep in mind that we're only looking for fast-enough. (The reference implementation doesn't try to do 
+anything other than simply looping through all processes.)
+
+(5)
