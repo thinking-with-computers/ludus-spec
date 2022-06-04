@@ -22,4 +22,6 @@ But, this does nevertheless impact a set of factors I will need to be consider a
 (4) We're in the realm of empirical testing of scheduling algorithms, and I can tell that's already going to give me heartburn. Keep in mind that we're only looking for fast-enough. (The reference implementation doesn't try to do 
 anything other than simply looping through all processes.)
 
-(5)
+(5) We're already pretty far off-piste from the Bob Nystrom way. In particular, I'm already thinking of static analysis, and the streaming compiler Bob uses in his stack-based VM example won't cut it. So I'm already going to be building an AST and analyzing it before compiling it into bytecode.
+
+(6) And, naturally (and I knew this was coming) I have to write persistent data structures for Ludus, especially if heap sharing (see (2)) is going to be a thing. I've already written a persistent vector in JS; it's fiddly but not difficult. This will of course be fiddlier in whatever low level language I end up using. But also the mechanics of persistent collections will likely require knowing about our garbage collection procedures. In particular, 
