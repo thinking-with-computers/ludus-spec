@@ -47,4 +47,4 @@ A few issues arise:
 
 * Perhaps this minimal version will be just fine (and with mitigated-enough powers that it won't/can't be abused). But: it's likely we'll want to actually be able to inspect and manipulate the ASTs that are passed in, which suggests we need a Ludus-compatible representation of an AST. At current, that's not possible, since the Clojure representations of Ludus ASTs, tokens, and data use fully-qualified keywords, e.g. `::ast/type`. The quick and dirty way to switch this would be to use Ludus dicts. Each language supports slashes in keywords, so it would be a quick search-and-replace in the Clojure codebase to allow for clean & usable representations of ASTs in Ludus. That said, there may well be something to trying to implement and use datatypes to represent the AST.
 
-* And finally, there's a question about whether the context should be present, or manipulable.
+* And finally, there's a question about whether the context should be present, or manipulable. I think it should not be.
