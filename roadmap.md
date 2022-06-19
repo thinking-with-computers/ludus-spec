@@ -24,14 +24,18 @@ As of now, the major parts of Ludus are largely worked out.
 #### Quality of life improvements
 Or, the rough edges that need to be sanded down, and bugfixes:
 * [x] Rename hashmaps to dicts
-* [ ] Splats in patterns
-	- [ ] List
-	- [ ] Dict
-	- [ ] Tuple? (Gather remaining members into a list? This would allow robustly variadic functions.)
-* [ ] `if`/`let` coding pattern/error handling: the test expression in an `if` will swallow panics caused by failures to match, and dump out to the `else` branch.
+* [~] Splats in patterns
+	- [~] List (parsing, not yet interpreting)
+	- [~] Dict (parsing, not yet interpreting)
+	- [~] Tuple (parsing, not yet interpreting)
+	- [~] Struct (parsing, not yet interpreting)
+* [x] `if`/`let` coding pattern/error handling: the test expression in an `if` will swallow panics caused by failures to match, and dump out to the `else` branch.
 * [x] Line number in error reporting is always `nil`: should, like, be the actual line number
 * [x] Fail gracefully when files not found
 * [ ] Add pretty-printing for patterns
+* [ ] Bugfixes
+	- [ ] Collection patterns allow for repetition of names (except tuples). Investigate each collection, and nested collections.
+	- 
 
 #### Syntax highlighting
 * [ ] SublimeText
