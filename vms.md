@@ -24,3 +24,7 @@ A few notes:
 5. I was able to worry publicly on /r/programminglanguages about possible difficulties with pointer sizes and NaN boxing. But one of the responses there was intriguing: you don't need that much performance optimization. So maybe the friendly closure-based approach really will be enough for what we need it for!
 
 So, the new strategy: worry less about performance above a particular floor, use crates to do things I don't want to write, use closures-as-compilation, use Rust's Rc to do memory management (since we're not so concerned about cycles), etc. 
+
+There are, or will be, opportunities to optimize, of course. Or even fallback positions: if it turns out that the closure strategy for compilation isn't sufficient, then we write a stack- or register-based VM (à la Nystrom, or not).
+
+This feels sane, and makes me optimistic. Less reinventing the wheel.
