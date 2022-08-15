@@ -39,4 +39,6 @@ when {
 ```
 This last would require lookahead, since you don't know if it's a block expression or the equivalent of a `cond` until you got to the arrow. 
 In addition, I don't love the idea of simply changing the semantics of what's in the block by adding a `<expr> is` before the brace.
+
+### Provisional conclusion
 So `if`, `cond`, and `when <expr> is <?type>`, with `if` in patterns.
