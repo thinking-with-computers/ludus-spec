@@ -218,3 +218,65 @@ get_method_on([], :first) &=> List :first
 ```
 
 Note that unlike in object-oriented languages, methods are not on the values, but on the type of the value, so you have to go through exactly this indirect path on every method call. There are way of making this fast(-enough), I think. That's the real kicker, here.
+
+### Getting down to brass tacks
+We need to actually get some proper syntax and parsing. So here's the final draft.
+
+#### Data declaration
+A datatype name comes after the reserved word `data`, along with a description of the type. The simplest of these is a nullary datatype: `data Foo`. `data` declarations must be in the toplevel of a script.
+
+#### Data constructors
+A datatype may also be constructed: it takes either a tuple or a struct pattern after it (with the caveat that the struct pattern opens simply with a curly brace and not `@{`. Examples: `data Foo (x, y, z)` or `data Bar {:baz, :quux}`. Because these are patterns, they may have restrictions on them: `data Foo (1, x, y)` or `data Bar {:baz as String, :quux as Number}`.
+
+#### Sum types
+Datatypes may also have multiple constructors. After the datatype name, such types have a `with` and then curly braces (cognate to `match x with` syntax):
+
+```
+data Foo with {
+    Bar (x, y)
+    Baz {:x, :y}
+    Quux
+}
+```
+In this case, `Foo` is _only_ the name of the type. `Bar`, `Baz`, and `Quux` are the data constructors.
+
+#### Constructing data
+A datatype may be constructed by placing a tuple or struct expression (again, less the `@` before the curly brace) after a data constructor. In the last case, `Bar (1, 2)` constructs a `Bar` holding the tuple `(1, 2)`. `Baz {:x 1, :y 2}` likewise creates a `Baz` with `1` at `:x` and `2` at `:y`. `Quux` is a nullary constructor. Data constructors may only be used in expressions in such construction expressions. They are not allowed in synthetic expressions, but only as proxy expressions. Constructed data types are not callable, and it makes little sense to write `Bar {:x 1, :y 2} :y`, which resolves to 2 and throws away the data.
+
+#### Deconstructing data
+There are two ways of getting data out of a constructed data type. First, if it's a struct data type, you can use keyword access, e.g.:
+
+```
+data Point with {
+    Point2D {:x as Number, :y as Number}
+    Point3D {:x as Number, :y as Number, :z as Number}
+}
+
+let my_point = Point2D {:x 1, :y 2}
+my_point :x &=> 1
+```
+
+If it's not a struct type, you _must_ use a pattern to deconstruct the data in some way, either using a `let`, `match`, or in a function clause. To wit:
+
+```
+data Result with {
+    Ok (value)
+    Error (message)
+}
+
+let my_res = Ok (42)
+
+let Ok (x) = my_res &=> 42, and x is now bound to 42
+let Error (y) = my_res &=> panic!, no match
+
+let my_value = match my_res as Result { & note the as clause here
+    Ok (x) -> x
+    Error (_) -> 0 & ignore the error message and return default value of 0
+}
+```
+
+#### Summary
+Data types may be used in the following cases:
+* After the `data` reserved word to declare a datatype, which may only be used at the top level
+* As an expression, when constructing data; this is terminal
+* In a pattern, when deconstructing data
