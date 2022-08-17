@@ -34,7 +34,7 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 * [x] Fail gracefully when files not found
 * [ ] Add pretty-printing for patterns
 * [ ] Bugfixes
-	- [ ] Collection patterns allow for repetition of names (except tuples). Investigate each collection, and nested collections.
+	- [x] Collection patterns allow for repetition of names (except tuples). Investigate each collection, and nested collections.
 
 #### Syntax highlighting
 * [ ] SublimeText
