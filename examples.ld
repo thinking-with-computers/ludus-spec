@@ -1,6 +1,8 @@
-& this is a comment; this is not evaluated as Ludus code
+& Ludus by Example
 
-& these are atoms: values that cannot be decomposed
+& this is a comment; anything on a line after an ampersand is not evaluated as Ludus code
+
+& Atoms: values that cannot be decomposed
 
 nil & this represents nothing
 
@@ -8,6 +10,8 @@ nil & this represents nothing
 1.2 & this is also a number, with a decimal point
 -2 & negative numbers are cool
 - 2 & parsing error! The negative sign is part of the number.
+
+& numbers are surprisingly hard and weird; this is all we'll say about them for now.
 
 :foo & this is a keyword
 :bar & this is also a keyword
@@ -59,6 +63,9 @@ break across lines with slashes to escape them"
 &&& dicts are persistent and do not have to be known in the source code
 &&& yet more on this below.
 
+&&& sets
+${1, 2, 2, 3, :foo} &=> ${1, 2, 3, :foo}; a set throws away any duplicated members
+
 & `let` expressions & matching
 
 & simple naming / let expressions
@@ -101,6 +108,8 @@ let () = ()
 let [] = []
 let #{} = #{}
 let @{} = @{}
+
+&&& but: sets cannot be matched against
 
 & patterns can be nested
 let (x, [y, z]) = (1, [2, 3]) & `y` is now 2, `z` is now 3
@@ -214,7 +223,7 @@ add_1 (2) &=> 3 & same application
 
 let only_foo = fn (:foo) -> :foo & the LHS of a function clause is a normal pattern
 only_foo (:foo) &=> :foo
-only_foo (:bar) & PANIC! could not match (:foo) with (:bar)
+only_foo (:bar) & PANIC! could not match (:foo) with (:bar) in `only_foo`
 
 & function calls can be nested, of course
 & the evaluation starts on the inside and works outward,
@@ -234,8 +243,78 @@ fn funny_add {
    (3) -> 5
    (4) -> 8
    (n) -> add (n, 23)
+   (x, y) -> add (x, y) & argument tuples do not need to be the same length
 } &=> fn funny_add
 
 funny_add (1) &=> 2
 funny_add (-2) &=> 21
-funny_add (:oops) & PANIC! no match
+funny_add (:oops) & PANIC! no match--note that this panic is raised by `add` in the last clause
+funny_add (1, 2) &=> 3
+
+& Getting things into and out of collections, redux
+
+&&& lists
+let my_list = [1, 2, 3]
+
+first (my_list) &=> 1
+rest (my_list) &=? [2, 3]
+second (my_list) & => 2
+nth (0, my_list) &=> 1; nth is 0-indexed
+nth (6, my_list) &=> nil; with any index beyond the size of the list, `nth` returns `nil`
+
+let longer_list = conj (my_list, 4) &=> [1, 2, 3, 4]; `conj` is short for conjoin
+my_list &=> [1, 2, 3]; `conj` does NOT alter the original list
+
+let silly_list = assoc (my_list, 0, :one) &=> [:one, 2, 3]
+my_list &=> [1, 2, 3]; like `conj`, `assoc` does not alter a list
+& `assoc` is short for associate
+
+&&& splats
+[4, ...my_list] &=> [4, 1, 2, 3]; an ellipsis "unfolds" a list into a new list
+[...my_list, 4] &=> [1, 2, 3, 4]; splats can be anywhere inside a list
+
+&&& tuples
+& tuples have far less freedom than lists
+let my_tup = (1, 2, 3)
+first (my_tup) &=> 1
+rest (my_tup) & PANIC! functions that return lists when used on lists panic when you use them on tuples
+nth (0, my_tup) &=> 1
+nth (6, my_tup) & PANIC! no element at index 6 in (1, 2, 3); nth/tuple access ALWAYS returns a value
+
+conj ((1, 2, 3), 4) & PANIC! same deal as `rest`
+& in particular, tuples must have known lengths and values in the source code
+
+(1, 2, ...my_tup) & PANIC! you cannot splat into a tuple; you need to spell everything out, however:
+
+[...my_tup, 4] &=> [1, 2, 3, 4]; you can splat a tuple INTO a list if you want to do anything list-y with it
+
+&&& dicts
+let my_dict = #{:foo 42, :bar 23, :baz "wowee"}
+
+:foo (my_dict) &=> 42; keywords can be called like functions, with a single dict or struct argument
+my_dict :foo &=> 42; keywords after a name pull the value out of the dict/struct
+my_dict :quux &=> nil; if a dict has nothing stored at a particular key, accessing that key returns nil
+
+assoc (my_dict, :quux, "nonsense!") &=> #{:foo 42, :bar 23, :baz "wowee", :quux "nonsense!"}
+my_dict &=> #{:foo 42, :bar 23, :baz "wowee"}; assoc also does not modify dicts
+
+#{:a 1, ...my_dict} &=> #{:a 1, :foo 42, :bar 23, :baz "wowee"}; dicts can also splat
+
+&&& structs
+& structs are to dicts as tuples are to lists: stricter, and static
+
+let my_struct = @{:foo 42, :bar 23, :baz "wowee"}
+:foo (my_struct) &=> 42 & same access patterns as a dict
+my_struct :foo &=> 42
+my_struct :quux & PANIC! no member :quux on @{...}
+
+assoc (my_struct, :quux, "nonsense!") & PANIC! cannot assoc onto a struct
+
+#{...my_struct, :foo 22} &=> #{:bar 23, :baz "wowee", :foo 22}; but splats work into dicts
+
+&&& a note on persistent vs. immutable data structures
+& All data in Ludus is immutable in the sense that no function lets you change any data, ever.
+& However, lists and dicts are "persistent" in the sense that they let you create new data, based on old data.
+& They have magic that makes this fast, so you're not copying all the data around.
+& Simply immutable data structures don't have this property.
+& Also, immutable data structures will cause panics if you try to get something out of them that isn't there.
