@@ -280,3 +280,71 @@ Data types may be used in the following cases:
 * After the `data` reserved word to declare a datatype, which may only be used at the top level
 * As an expression, when constructing data; this is terminal
 * In a pattern, when deconstructing data
+
+### Some notes, much later
+This all looks excellent so far. A few additional notes:
+
+#### Module names
+Modules should have lower case names, and should be explicitly tied to a single datatype so the linked list example above:
+
+```
+data Llist with {
+	Empty
+	Cons (first, rest as Llist)
+}
+
+fn first (list) -> match list as Llist with {
+	Empty -> nil
+	Cons (x, _) -> x
+}
+
+fn rest (list) -> match list as Llist with {
+	Empty -> Empty
+	Cons (_, rest) -> rest
+}
+
+fn cons {
+	() -> Empty
+	(value) -> cons (value)
+	(value, list) -> Cons (value, list)
+}
+
+fn conj {
+	() -> Empty
+	(value) -> Cons (value, Empty)
+	(list, value) -> Cons (value, list)
+}
+
+fn from_list {
+	([]) -> Empty
+	([x]) -> Cons (x, Empty)
+	([x, ...xs]) -> Cons (x, from_list (xs))
+}
+
+fn new (...xs) -> from_list (xs)
+
+&...
+
+module llist with Llist {
+	first
+	rest
+	conj
+	cons
+	:llist new
+	&...
+}
+```
+Normal rules apply: 
+* The module name cannot already be bound 
+* However, it's possible to use explicit bindings to shadow the name within the module, as above (swapping `llist` for `new`).
+
+### These notes added Feb 12
+I think I want data constructors to be introduced not by `with` but by `as`:
+
+```
+data Foo as {
+	Bar (x, y)
+	Baz {:x, :y}
+}
+```
+This makes it clear that you can't hace a bare `Foo`, you must use `Bar` or `Bas` constructors. It's a small change, but a meaningful one.

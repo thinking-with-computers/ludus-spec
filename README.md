@@ -78,6 +78,8 @@ Keywords evaluate to themselves and only to themselves. They are written as a wo
 ###### Terminators
 Characters that terminate words: here's the set of terminator characters (as Clojure characters): `\: \; \newline \space \tab \{ \} \( \) \[ \] \$ \# \- \< \& \, \|`.
 
+TODO: Update this list: no \<, \|, add \>. What else?
+
 ##### Strings
 UTF8 strings are set off by double quotes: `"this is a string"`. Normally, they may only be one line. But, strings may be split across lines with a `\` before the newline. (Strings are also complicated!)
 

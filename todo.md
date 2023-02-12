@@ -56,7 +56,7 @@ As of May 20, 2022.
 	- [x] hashmap
 	- [x] list
 	- [x] set
-* [ ] `if let` scoping/errors
+* [x] `if let` scoping/errors
 * [x] `panic!` as reserved word, not function-like
 
 ### Bugfixes

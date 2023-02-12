@@ -35,6 +35,8 @@ Or, the rough edges that need to be sanded down, and bugfixes:
 * [ ] Add pretty-printing for patterns
 * [ ] Bugfixes
 	- [x] Collection patterns allow for repetition of names (except tuples). Investigate each collection, and nested collections.
+	- [ ] Fix backslash scanning in strings 
+* [ ] 
 
 #### Syntax highlighting
 * [ ] SublimeText
