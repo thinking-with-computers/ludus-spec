@@ -24,7 +24,7 @@ false & Boolean false
 
 "the quick brown fox jumped over the lazy dogs"
 "strings can\
-break across lines with slashes to escape them"
+break across lines with slashes to escape newlines"
 
 & these are collections: values that combine other values
 
@@ -141,6 +141,9 @@ if let (x, y) = pt2d & line breaks are okay after the condition expression
 
 if let (x, y) = pt3d then :two_dee else :three_dee &=> :three_dee
 
+& but:
+let (x, y) = pt3d & PANIC! Cannot match (1, 2, 3) with (x, y)
+
 & match errors in an `if`'s condition expression cause it to evaluate as falsy, rather than raising a panic
 & the names from a `let` in a condition expression are bound in the `then` branch, but not the `else` branch
 
@@ -168,7 +171,7 @@ match might_fail_fail with { & match {test expression} with { {clauses} }
       (:ok, value) -> value & if the pattern/LHS matches, bind the names and evaluate the result
       (:error, msg) -> :oops
       & like cond, we get a panic of nothing matches
-      & we have similar fallthroughs
+      & we have similar fallthroughs:
       else -> :something_else & `else`
       _ -> :something else & a placeholder
 } &=> :oops
@@ -485,6 +488,10 @@ fubar :quux () &=> No member :quux in namespace `fubar`
 
 & like `data` and `import`, `ns` can only be used in the toplevel
 & this means we can check if you've made a namespace access mistake before the program is even run.
+& e.g.,
+import "fubar.ld" as fubar
+fubar :foo () &=> :foo
+fubar :quux & PANIC: no member :quux in namespace `fubar`; and we can know this through source code only.
 
 &&& Modules and methods: group functions together AND tie them to a datatype
 & in vector.ld
@@ -518,7 +525,7 @@ import "vector.ld" as vect
 let my_vect = vect :Vector2D (3, 4) &=> Vector2D (3, 4)
 vect :mag (my_vect) &=> 5
 
-& you can destructure modules and namespaces with pattern matching
+& you can destructure modules and namespaces with pattern matching as though they were structs
 let @{Vector2D, mag} = vect
 
 mag (Vector2D (3, 4)) &=> 5
@@ -538,5 +545,6 @@ mag (Vector2D (3, 4)) &=> 5
 
 & methods don't need to be in scope, since they locate the correct function through dispatch
 & note that above, we *didn't* bring Vector :add into scope, but it still works
-
+& this means we can use methods without knowing what type they're applied to, which enables protocols, contracts about which methods a type has.
 & Ludus does not do multiple dispatch.
+& Ludus comes (will come) with built-in modules and methods galore.
