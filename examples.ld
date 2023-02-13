@@ -318,3 +318,225 @@ assoc (my_struct, :quux, "nonsense!") & PANIC! cannot assoc onto a struct
 & They have magic that makes this fast, so you're not copying all the data around.
 & Simply immutable data structures don't have this property.
 & Also, immutable data structures will cause panics if you try to get something out of them that isn't there.
+
+&&& blocks: grouping multiple expressions together
+fn avg (x, y) -> { & blocks begin with curly braces
+   let sum = add (x, y) & binds `sum`
+   div (sum, 2) & uses `sum`, divides it by 2; the whole block evaluates to the last expression in a block
+} & blocks end with curly braces
+
+avg (1, 3) &=> 2
+
+& blocks can be used in place of any expression: the LHS of `let`s, anywhere in an `if`/`then`/`else`, `match` clauses, function clauses, `cond` clauses, etc.
+
+&&& `do` expressions (or pipelines): chaining functions together
+fn funny_math (x) -> do x & `do` evaluates an expression
+   > add (1, _) & and passes it as a single argument to the function after the `>`, here adding 1
+   > mult (2, _) & ...multiplying by 2
+   > sqrt & ...taking the square root; note the absence of an argument tuple---functions that take a single argument don't need placeholders to work in `do` expressions
+   > negate & ...negating it
+   > add (100, _) & ...then adding it to 100
+
+funny_math (7) &=> 96: 7 + 1 = 8 -> 8 * 2 = 16 -> sqrt 16 = 4 -> -4 -> 100 + -4 = 96
+
+& note: the placeholder is *extremely* useful in `do` expressions
+
+&&& iteration: recursion and loops
+& one very normal way to iterate in Ludus is recursion; Ludus optimizes simple recursion
+fn add_1_to_every {
+   (xs) -> add_1_to_every (xs, []) & helper: recur to the binary version of the function, giving us an empty list to start with
+   ([], ys) -> ys & when we have nothing in the original list, return the new list, with addition
+   ([x, ...xs], ys) -> add_1_to_every (xs, conj (ys, add (1, x))) & recur
+}
+
+add_1_to_every ([1, 2, 3]) &=> [2, 3, 4]
+
+& but we also have a special looping form, which is much the same
+& this version has the advantage of not leaking the binary version of `add_1_to_every`
+fn add_1_to_every (xs) -> loop (xs, []) with {
+   ([], ys) -> ys
+   ([x, ...xs], ys) -> recur (xs, conj (ys, add (1, x)))
+}
+
+&&& At this point, we have a very friendly and ergonomic functional language.
+&&& That said, we're missing one major thing: how to change anything at all.
+&&& Names are bound once and forever, and no data structures ever change.
+
+&&& Mutation: `ref`s
+& A `ref` is a `reference`, the only thing that can change over time. Instead of being a value (like everything else in Ludus), it's a reference to a value.
+ref my_num = 0 &=> ref my_num: 0; refs have names
+& To get the value out of a `ref`, you need to dereference it: `deref`
+deref (my_num) &=> 0
+& To change the value of a `ref`, you need to set its value: `set!` (The exclamation point reminds us this is dangerous.)
+set! (my_num, 1) &=> ref my_num: 1
+
+fn inc_mut (the_ref) -> do the_ref
+   > deref
+   > add (1, _)
+   > set! (the_ref, _)
+
+inc_mut (my_ref) &=> ref my_num: 2
+inc_mut (my_ref) &=> ref my_num: 3
+my_num &=> ref my_num: 3
+
+&&& Depending on other code: scripts and `import`s
+& Ludus files are scripts: like blocks, they are evaluated from top to bottom, and return the last expression.
+& So if you run `ludus myscript.ld` at a command prompt, you get back the result of the last expression in `myscript.ld`
+& Sometimes, you don't want to put everything in a single, big script. For that, we use an `import` expression
+import "foo.ld" as foo &=> whatever the last expression in `foo.ld` evaluates to, which is then bound to `foo`
+
+& That said, an `import` expression may ONLY appear in the "top level" of a script: it may never be on the RHS of anything.
+
+&&& And, at this point, we have almost everything we need.
+&&& The one final thing we have to have is a model for doing more than one thing at a time: concurrency.
+
+&&& Concurrency in Ludus: Processes
+& Ludus (like Erlang/Elixir) has the idea of processes: little dudes that can do things separately from one another.
+& A process can be `spawn`ed, and then can `send` and `receive` messages.
+& A single script can spawn arbitrarily many processes, even as it's just evaluated from beginning to end.
+& This splay between the textual and executed dimensions of a program is why concurrency is hard.
+& Concurrency really is hard, and we don't have a lot of motivating use here, since all motivations are complicated (as they involve systems that want to do things at the same time).
+
+& But here's the overview:
+
+& spawning a new process
+spawn {expression} &=> PID ({some number}) evaluates {expression} in a new context, returning a Process ID (PID).
+spawn {expression} as {name} &=> does the same thing, but gives the process a name for convenience; returns the PID.
+
+& sending messages
+send {expression} to {PID} &=> whatever {expression} evaluates to; sends the value to the process, putting it in the process's mailbox
+& `send` returns immediately, but the recipient process may take arbitrarily long to do anything with the message
+
+& `receive` receives messages
+& Each process has a mailbox; `receive` pulls the oldest message out of the mailbox, or waits until there is a message, and then pattern matches against that message.
+receive {
+    (:ok, value) -> ...
+    (:error, message) -> ...
+}
+
+&&& Getting really strict: Datatypes
+& Datatypes are actually really foundational to Ludus. Think of them like named structs or tuples.
+data Point2D (x, y) & describes a datatype that carries with it a tuple (x, y), bound to the name `Point2D`
+data Point3D (x, y, z) & note that, unlike values, data names are capitalized
+
+& constructing a datatype
+let my_2d = Point2D (3, 4) & constructs a Point2D with (3, 4)
+
+& pattern matching against a datatype
+let Point2D (x, y) = my_2d &=> Point2D (3, 4), with `x` bound to 3 and `y` bound to 4.
+
+let Point3D (x, y, z) = my_2d & PANIC! cannot match Point2D (x, y) with Point3D (x, y, z)
+let (x, y) = my_2d & PANIC! cannot match: you must use the data constructor on the LHS of a match
+
+&&& keyed datatypes: not just tuples, also structs!
+data Point2D {x, y} & note the shorthand, {:x, :y} would be fine
+data Point3D {x, y, z}
+
+let my_2d = Point2D {:x 3, :y 4} &=> Point2D {:x 3, :y 4}
+my_2d :x &=> 3
+:y (my_2d) &=> 4
+my_2d :z &=> PANIC! No key :z on Point2D {:x 3, :y 4}
+
+&&& Datatypes with no constructors
+& It's possible to create a datatype with a nullary constructor (no tuple or struct afterwards)
+data Foo
+
+&&& Types and Variants: Datatypes with multiple constructors
+& Suppose your 2D and 3D points had similar functions. In place of the above example:
+data Point as { & `Point` is the type; it cannot be constructed as `Point`; it must use a variant of Point
+     Point2D (x, y) & `Point2D` is a constructor for `Point`
+     Point3D (x, y, z) & `Point3D` is also a constructor for `Point`
+} &=> Point; but from here, `Point`, `Point2D`, and `Point3D` are all bound names
+& but also, the variants are also keyed on `Point`
+Point :Point2D (1, 2) &=> Point2D (1, 2)
+
+fn distance_from_origin (p) -> match p as Point { & note the `as` here; it will cause a panic if `p` is not some variant of `Point`
+   Point2D (x, y) -> sqrt (add (square (x), square (y))) & note the LHS on the pattern here, as above in the `let` example
+   Point3D (x, y, z) -> sqrt (add (square (x), square (y), square (z)))
+}
+
+distance_from_origin (Point2D (3, 4)) &=> 5
+
+& `data` expressions, like `import` expressions, are only allowed to be used in the top level of a script
+& the foregoing allows for the following check (before running the program!):
+
+fn angle_from_x_axis (p) -> match p as Point {
+   Point2D (x, y) -> arctan (x, y)
+} & PANIC: match expression does not include all variants of point: missing Point3D
+
+&&& Namespaces: group functions together
+& A script might not actually *do* anything, other than describe a bunch of functions.
+& But you'll want to be able to import all the functions from a script in a new one.
+& You could just use a dict or a struct.
+& But we have a civilizing nicety: a namespace.
+
+fn foo () -> :foo
+fn bar () -> "bar"
+fn baz () -> 42
+
+ns fubar {
+   foo
+   bar
+   baz
+} & this is, effectively, a struct with a name
+
+fubar :foo () &=> :foo
+fubar :quux () &=> No member :quux in namespace `fubar`
+
+& like `data` and `import`, `ns` can only be used in the toplevel
+& this means we can check if you've made a namespace access mistake before the program is even run.
+
+&&& Modules and methods: group functions together AND tie them to a datatype
+& in vector.ld
+data Vector {
+     Vector2D (x, y)
+     Vector3D (x, y, z)
+}
+
+fn mag (v) -> match v as Vector {
+   Vector2D (x, y) -> sqrt (add (square (x), square (y)))
+   Vector3D (x, y, z) -> sqrt (add (square (x), square (y), square (z)))
+}
+
+fn add {
+   (v1 as Vector2D, v2 as Vector2D) -> {
+       let (x, y) = v1
+       let (a, b) = v2
+       Vector2D (add (x, a), add (y, b))
+   }
+   (v1 as Vector3D, v2 as Vector3D) -> ...
+}
+
+module vector with Vector {
+    mag
+    add
+}
+
+& in some other script
+import "vector.ld" as vect
+
+let my_vect = vect :Vector2D (3, 4) &=> Vector2D (3, 4)
+vect :mag (my_vect) &=> 5
+
+& you can destructure modules and namespaces with pattern matching
+let @{Vector2D, mag} = vect
+
+mag (Vector2D (3, 4)) &=> 5
+
+&&& methods, on the other hand, dispatch from a type to a function that's included in a module
+& methods are written as `::{name}`
+
+::add (3, 4) &=> 7
+::add (Vector2D (1, 2), Vector2D (3, 4)) &=> Vector2D (4, 6)
+& each of these calls to `::add` calls a different function (in the `number` vs `vector` module), based on the type of the first argument.
+& in fact, many of the core functions of Ludus are actuall method calls.
+& write a module with an `add` method, and your plain old `add` will work with it.
+
+& accessing a method that's not on a type gives you a panic:
+::sub (4, 3) &=> 1
+::sub (Vector2D (4, 3), Vector2D (2, 1)) & PANIC!: no method `::sub` for type `Vector`
+
+& methods don't need to be in scope, since they locate the correct function through dispatch
+& note that above, we *didn't* bring Vector :add into scope, but it still works
+
+& Ludus does not do multiple dispatch.
