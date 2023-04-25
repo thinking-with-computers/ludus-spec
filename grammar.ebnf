@@ -1,0 +1,88 @@
+GIVEN:
+* nonzero
+* digit
+* lowercase (ASCII)
+* uppercase (ASCII)
+* u8
+
+ws -> { " ", "\t", "\r" }
+
+newline -> "\n"
+
+// literals
+nil -> "nil"
+
+true -> "true"
+
+false -> "false"
+
+// identifiers
+id_init -> lowercase | "_"
+
+id_char -> lowercase | "_" | uppercase | digit | "/" | "?" | "!" | "-"
+
+// datatype identifiers
+data_init -> uppercase
+
+id -> id_init, {id_char}
+
+data_id -> data_init, {id_char}
+
+// keywords
+keyword -> ":", {id_char}
+
+// numbers
+number -> "0" | (["-"] {nonzero} [".", digit, [{digit}]])
+
+// strings
+interpolation -> "{", id, "}"
+
+string -> "\"", {(u8, interpoliation)}, "\""
+
+atom -> nil | true | false | id | data_id | keyword | number | string
+
+// expressions
+expression -> block
+			| let
+			| do
+			| synthetic
+			| if
+			| cond
+			| match
+			| fn
+			| loop
+			| ref
+
+toplevel -> expression
+		  | import
+		  | ns
+		  | test
+		  | module
+		  | data
+
+script -> { toplevel }
+
+synthetic_first -> id | keyword
+
+synthetic_rest -> arguments | keyword
+
+separator -> "," | "\n"
+
+arguments -> "(", [arg_exprs], [separator, "_", separator], {arg_exprs}, {separator}, ")"
+
+synthetic -> synthetic_first, synthetic_rest, {synthetic_rest}
+
+tuple -> "(", tuple_exprs, {separator},   ")"
+
+tuple_exprs -> {separator}, [expression, {separator, expression}]
+
+block -> "{", { expression }, "}"
+
+pattern -> //...
+
+if -> "if", ws, 
+
+// collections
+
+// tuple
+
