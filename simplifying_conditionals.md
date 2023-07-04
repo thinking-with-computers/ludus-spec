@@ -42,3 +42,10 @@ In addition, I don't love the idea of simply changing the semantics of what's in
 
 ### Provisional conclusion
 So `if`, `cond`, and `when <expr> is <?type>`, with `if` in patterns.
+
+### On if-let chaining
+See https://github.com/rust-lang/rfcs/pull/2497.
+
+One thought I have around the `and` and `or` special forms is to ensure that they pass through what they need to allow if-lets, and thus to ensure chaining, e.g. `if and (let x = 1, let y = 2) then :yes else :no`. In addition, I need to ensure that any and all bindings in the condition expression in an `if` only binds in the `then` and `else` expressions.
+
+That suggests that `and` and `or` really do need to be true special forms.
